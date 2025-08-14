@@ -2,26 +2,31 @@ import subprocess
 import threading
 import time
 
+DEPLOYMENT_TYPE = "windows" #linux,docker,windows
+
 # Define the commands
 
-# Windows
-# commands = [
-#     ["./venv/Scripts/python.exe", "./app.py"],
-#     ["./backend/pocketbase.exe", "serve", "--http=0.0.0.0:8090"]
-# ]
-
-# Linux
-# commands = [
-#     ["./venv/bin/python", "./app.py"],
-#     ["./backend/pocketbase", "serve", "--http=0.0.0.0:8090"]
-# ]
-
-# Docker
-commands = [
-    ["python", "./app.py"],
-    ["./backend/pocketbase", "serve", "--http=0.0.0.0:8090"]
-]
-
+if DEPLOYMENT_TYPE == "windows":
+    # Windows
+    commands = [
+        ["./venv/Scripts/python.exe", "./app.py"],
+        ["./backend/pocketbase.exe", "serve", "--http=0.0.0.0:8090"]
+    ]
+elif DEPLOYMENT_TYPE == "linux":
+        # Linux
+        commands = [
+            ["./venv/bin/python", "./app.py"],
+            ["./backend/pocketbase", "serve", "--http=0.0.0.0:8090"]
+        ]
+elif DEPLOYMENT_TYPE == "docker":
+        # Docker
+        commands = [
+            ["python", "./app.py"],
+            ["./backend/pocketbase", "serve", "--http=0.0.0.0:8090"]
+        ]
+else:
+        print("Unknown deployment type")
+        exit(1)
 
 # Function to run a command and restart it if it crashes
 def run_command(cmd):

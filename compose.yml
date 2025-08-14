@@ -1,6 +1,6 @@
 services:
   rbl-portal:
-    image: infyrus/rbl-sourcing-portal:latest
+    image: ghcr.io/rkjha-infyrus/rblsourcingportal:latest
     container_name: rbl-portal
     ports:
       - "8090:8090"

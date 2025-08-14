@@ -1,0 +1,9 @@
+.github/
+venv/
+.env
+.env.example
+.gitignore
+.dockerignore
+build.bat
+build.sh
+Dockerfile
