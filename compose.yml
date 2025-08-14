@@ -8,3 +8,6 @@ services:
     env_file:
       - .env
     restart: unless-stopped
+    volumes:
+      # Mount PocketBase data directory to persist data
+      - ./pocketbase_data:/app/backend/pb_data
