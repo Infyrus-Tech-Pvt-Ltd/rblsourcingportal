@@ -7,3 +7,4 @@ venv/
 build.bat
 build.sh
 Dockerfile
+backend/

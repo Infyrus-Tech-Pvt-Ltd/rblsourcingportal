@@ -24,6 +24,7 @@ load_dotenv()
 
 app.secret_key = os.getenv('SECRET_KEY')
 DEV_MODE = os.getenv('DEV_MODE', 'False') == 'True'
+VERSION = os.getenv('VERSION', '1.0.0')
 
 # =============================================================================
 # CONFIGURATION AND CONSTANTS
@@ -42,6 +43,15 @@ INQUIRIES_PER_PAGE = 7
 SUPPLIERS_PER_PAGE = 7
 
 pb = PocketBase(POCKETBASE_URL)
+
+# =============================================================================
+# TEMPLATE CONTEXT PROCESSORS
+# =============================================================================
+
+@app.context_processor
+def inject_version():
+    return dict(version=VERSION)
+
 # =============================================================================
 # UTILITY FUNCTIONS
 # =============================================================================
