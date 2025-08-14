@@ -2,7 +2,7 @@ import subprocess
 import threading
 import time
 
-DEPLOYMENT_TYPE = "windows" #linux,docker,windows
+DEPLOYMENT_TYPE = "linux" #linux,docker,windows
 
 # Define the commands
 
