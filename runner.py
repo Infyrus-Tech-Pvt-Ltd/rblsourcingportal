@@ -7,22 +7,23 @@ DEPLOYMENT_TYPE = "docker" #linux,docker,windows
 # Define the commands
 
 if DEPLOYMENT_TYPE == "windows":
-    # Windows
-    commands = [
-        ["./venv/Scripts/python.exe", "./app.py"],
-        ["./backend/pocketbase.exe", "serve", "--http=0.0.0.0:8090"]
-    ]
+        # Windows
+        commands = [
+            ["./backend/pocketbase.exe", "serve", "--http=0.0.0.0:8090"],
+            ["./venv/Scripts/python.exe", "./app.py"]
+        ]
 elif DEPLOYMENT_TYPE == "linux":
         # Linux
         commands = [
-            ["./venv/bin/python", "./app.py"],
-            ["./backend/pocketbase", "serve", "--http=0.0.0.0:8090"]
+            ["./backend/pocketbase", "serve", "--http=0.0.0.0:8090"],
+            ["./venv/bin/python", "./app.py"]
         ]
 elif DEPLOYMENT_TYPE == "docker":
         # Docker
         commands = [
-            ["python", "./app.py"],
-            ["./backend/pocketbase", "serve", "--http=0.0.0.0:8090"]
+            ["./backend/pocketbase", "serve", "--http=0.0.0.0:8090"],
+            ["python", "./app.py"]
+
         ]
 else:
         print("Unknown deployment type")
