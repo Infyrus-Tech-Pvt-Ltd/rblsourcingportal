@@ -1468,8 +1468,43 @@ def suppliers():
 @login_required
 def add_supplier():
     if request.method == 'POST':
-        # handle form data and add to database
-        return redirect(url_for('suppliers'))
+        try:
+            data = request.form.to_dict()
+            
+            # Validate required fields
+            name = data.get('name', '').strip()
+            contact = data.get('contact', '').strip()
+            
+            if not name or not contact:
+                flash('Name and contact are required fields.', 'error')
+                return render_template('add_supplier.html')
+            
+            # Prepare supplier data for PocketBase
+            pb_data = {
+                "name": name,
+                "contact": contact,
+                "email": data.get('email', '').strip(),
+                "address": data.get('address', '').strip()
+            }
+            
+            # Send request to PocketBase API (same pattern as add_product)
+            pb_url = f"{POCKETBASE_URL}/api/collections/suppliers/records"
+            resp = requests.post(pb_url, data=pb_data, headers=HEADERS)
+            
+            # Debug output to terminal
+            print("PocketBase Response:", resp.status_code, resp.text)
+            
+            if resp.status_code in (200, 201):
+                flash('Supplier added successfully!', 'success')
+                return redirect(url_for('suppliers'))
+            else:
+                flash(f'Error adding supplier: {resp.text}', 'error')
+                print(f"Error adding supplier: {resp.text}")
+                
+        except Exception as e:
+            flash(f'Unexpected error: {str(e)}', 'error')
+            print(f"Unexpected error in add_supplier: {e}")
+    
     return render_template('add_supplier.html')
 
 @app.route("/supplier/<supplier_id>")

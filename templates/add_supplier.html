@@ -43,7 +43,7 @@
 
       <!-- Form Body -->
       <div class="p-8">
-        <form id="supplierForm" class="space-y-6">
+        <form id="supplierForm" method="POST" action="{{ url_for('add_supplier') }}" class="space-y-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
@@ -124,37 +124,10 @@
   </div>
 </div>
 
-<!-- PocketBase SDK -->
-<script src="https://unpkg.com/pocketbase/dist/pocketbase.umd.js"></script>
 <script>
-  const pb = new PocketBase('http://127.0.0.1:8090');
-
-  document.getElementById("supplierForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
-
-    const data = {
-      name: document.getElementById("name").value.trim(),
-      contact: document.getElementById("contact").value.trim(),
-      email: document.getElementById("email").value.trim() || undefined, // Skip if empty
-      address: document.getElementById("address").value.trim() || undefined, // Skip if empty
-    };
-
-    try {
-      await pb.collection("suppliers").create(data);
-      alert("Supplier added successfully!");
-      window.location.href = "/suppliers";
-    } catch (error) {
-      console.error("Error details:", error?.response || error);
-      alert("Failed to add supplier. Reason: " + (error?.response?.message || JSON.stringify(error?.response) || "Unknown error"));
-    }
-  });
-
   function cancelAdd() {
-    // Option 1: Redirect directly to suppliers page
+    // Redirect to suppliers page
     window.location.href = "/suppliers";
-
-    // Option 2: Just go back to previous page
-    // window.history.back();
   }
 </script>
 {% endblock %}
