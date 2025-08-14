@@ -7,11 +7,14 @@ WORKDIR /app
 # Copy requirements first (for caching)
 COPY requirements.txt ./
 
-# Install dependencies if requirements.txt exists
-RUN pip install --no-cache-dir -r requirements.txt || true
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application files
 COPY . .
+
+# Make pocketbase executable - THIS IS THE KEY FIX
+RUN chmod +x ./backend/pocketbase
 
 # Expose the required ports
 EXPOSE 8090
