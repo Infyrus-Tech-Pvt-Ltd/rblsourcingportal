@@ -5,6 +5,8 @@ services:
     ports:
       - "8090:8090"
       - "5050:5050"
+    volumes:
+      - ./backend:/app/backend
     env_file:
       - .env
     restart: unless-stopped
