@@ -1,0 +1,10 @@
+services:
+  rbl-portal:
+    image: infyrus/rbl-sourcing-portal:latest
+    container_name: rbl-portal
+    ports:
+      - "8090:8090"
+      - "5050:5050"
+    env_file:
+      - .env
+    restart: unless-stopped

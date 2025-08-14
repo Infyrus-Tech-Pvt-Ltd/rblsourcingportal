@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RBL Sourcing</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.jpg') }}">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Add Heroicons for menu icons -->
+  <script src="https://unpkg.com/heroicons@2.0.16/24/outline/index.js" type="module"></script>
+  <style>
+    /* Dark gradient button style */
+    .btn-dark-gradient {
+      background: linear-gradient(90deg, #232526 0%, #414345 100%);
+      color: #fff;
+      border: none;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      padding: 0.5rem 1.25rem;
+      font-weight: 500;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .btn-dark-gradient:hover {
+      background: linear-gradient(90deg, #232526 0%, #232526 100%);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    }
+    /* Ensure full height coverage */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Sidebar styles */
+    #sidebar {
+      position: fixed;
+      top: 64px; /* header height */
+      left: 0;
+      height: calc(100vh - 64px);
+      width: 280px;
+      background: rgba(255 255 255 / 0.95);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid rgba(79 70 229 / 0.2);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      transform: translateX(0);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 40;
+      padding: 1.5rem 0;
+    }
+
+    /* Sidebar closed state */
+    #sidebar.closed {
+      transform: translateX(-100%);
+    }
+
+    /* Mobile overlay */
+    #sidebar-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 35;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    #sidebar-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* User dropdown */
+    .user-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      transform: translateY(8px);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s ease;
+      z-index: 50;
+    }
+
+    .user-dropdown.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    /* Main content responsive adjustments */
+    #main-content {
+      margin-left: 280px;
+      transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #main-content.sidebar-closed {
+      margin-left: 0;
+    }
+
+    /* Ensure content stays centered */
+    .content-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Navigation link hover effects */
+    .nav-link {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-link::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(79, 70, 229, 0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    .nav-link:hover::before {
+      left: 100%;
+    }
+
+    /* Mobile specific styles */
+    @media (max-width: 1023px) {
+      #sidebar {
+        transform: translateX(-100%);
+      }
+      
+      #sidebar.open {
+        transform: translateX(0);
+      }
+      
+      #main-content {
+        margin-left: 0;
+      }
+      
+      #sidebar-overlay.active {
+        display: block;
+      }
+    }
+  </style>
+</head>
+
+<body class="min-h-full bg-gradient-to-br from-indigo-100 via-blue-100 to-purple-100 text-gray-800 overflow-x-hidden">
+
+  <!-- Decorative Background Blobs -->
+  <div class="fixed w-96 h-96 bg-purple-300 rounded-full filter blur-3xl opacity-30 top-10 left-10 -z-10"></div>
+  <div class="fixed w-80 h-80 bg-pink-300 rounded-full filter blur-2xl opacity-20 bottom-10 right-10 -z-10"></div>
+  <div class="fixed w-[600px] h-[600px] bg-indigo-200 rounded-full filter blur-[160px] opacity-10 -top-20 left-1/2 transform -translate-x-1/2 -z-10"></div>
+
+  <!-- Header -->
+  <header class="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md shadow-lg border-b border-indigo-100 flex items-center justify-between px-4 lg:px-6 py-3 z-50 h-16">
+    <div class="flex items-center">
+      <!-- Menu toggle (now visible on all screen sizes) -->
+      <button id="menu-toggle" class="mr-3 p-2 rounded-lg hover:bg-indigo-50 transition-colors">
+        <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+      
+      <img src="{{ url_for('static', filename='logo.jpg') }}" alt="RBL Logo" class="h-10 w-20 mr-3 rounded-md" />
+      <h1 class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Sourcing</h1>
+    </div>
+    
+    <div class="flex items-center space-x-4">
+      <!-- User profile dropdown -->
+      <div class="relative">
+        <button id="user-menu-button" class="flex items-center space-x-2 p-2 rounded-lg hover:bg-indigo-50 transition-colors">
+          <div class="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+          </div>
+          <div class="hidden md:block text-left">
+            <p class="text-sm font-medium text-gray-700">{{ session.get('user_name', 'User') }}</p>
+            <p class="text-xs text-gray-500">{{ session.get('user_email', 'user@example.com') }}</p>
+          </div>
+          <svg class="w-4 h-4 text-gray-500 transition-transform duration-200" id="dropdown-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+        
+        <!-- Dropdown menu -->
+        <div id="user-dropdown" class="user-dropdown w-56 bg-white rounded-xl shadow-xl border border-gray-200 py-2">
+          <div class="px-4 py-3 border-b border-gray-100">
+            <p class="text-sm font-medium text-gray-900">Signed in as</p>
+            <p class="text-sm text-gray-500 truncate">{{ session.get('user_email', 'user@example.com') }}</p>
+          </div>
+          
+          <div class="py-1">
+            <form method="POST" action="/logout">
+              <button type="submit" class="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                </svg>
+                Sign out
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile sidebar overlay -->
+  <div id="sidebar-overlay"></div>
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="scrollbar-thin scrollbar-thumb-indigo-200">
+    <div class="px-6 mb-6">
+      <h2 class="text-lg font-semibold text-gray-800 mb-2">Navigation</h2>
+      <div class="w-12 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"></div>
+    </div>
+    
+    <nav class="space-y-1 px-3">
+      <a href="/dashboard" class="nav-link flex items-center px-4 py-3 text-gray-700 rounded-xl hover:bg-indigo-50 hover:text-indigo-700 transition-all duration-200 group">
+        <svg class="w-5 h-5 mr-3 group-hover:text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6a2 2 0 01-2 2H10a2 2 0 01-2-2V5z"></path>
+        </svg>
+        <span class="font-medium">Dashboard</span>
+      </a>
+      
+      <a href="/customers" class="nav-link flex items-center px-4 py-3 text-gray-700 rounded-xl hover:bg-indigo-50 hover:text-indigo-700 transition-all duration-200 group">
+        <svg class="w-5 h-5 mr-3 group-hover:text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+        </svg>
+        <span class="font-medium">Customers</span>
+      </a>
+      
+      <a href="/product" class="nav-link flex items-center px-4 py-3 text-gray-700 rounded-xl hover:bg-indigo-50 hover:text-indigo-700 transition-all duration-200 group">
+        <svg class="w-5 h-5 mr-3 group-hover:text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M9 5l7 7-7 7"></path>
+        </svg>
+        <span class="font-medium">Products</span>
+      </a>
+      
+      <a href="/inquiries" class="nav-link flex items-center px-4 py-3 text-gray-700 rounded-xl hover:bg-indigo-50 hover:text-indigo-700 transition-all duration-200 group">
+        <svg class="w-5 h-5 mr-3 group-hover:text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span class="font-medium">Inquiries</span>
+      </a>
+      
+      <a href="/suppliers" class="nav-link flex items-center px-4 py-3 text-gray-700 rounded-xl hover:bg-indigo-50 hover:text-indigo-700 transition-all duration-200 group" 
+         {% if session.get('user_role') == 'staff' %}style="display: none;"{% endif %}>
+        <svg class="w-5 h-5 mr-3 group-hover:text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+        </svg>
+        <span class="font-medium">Suppliers</span>
+      </a>
+      
+      <a href="/reminders" class="nav-link flex items-center px-4 py-3 text-gray-700 rounded-xl hover:bg-indigo-50 hover:text-indigo-700 transition-all duration-200 group">
+        <svg class="w-5 h-5 mr-3 group-hover:text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span class="font-medium">Reminders</span>
+      </a>
+      
+      <a href="/staff" class="nav-link flex items-center px-4 py-3 text-gray-700 rounded-xl hover:bg-indigo-50 hover:text-indigo-700 transition-all duration-200 group"
+         {% if session.get('user_role') == 'staff' %}style="display: none;"{% endif %}>
+        <svg class="w-5 h-5 mr-3 group-hover:text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+        </svg>
+        <span class="font-medium">Staff</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main id="main-content" class="min-h-screen pt-20 px-4 lg:px-6 pb-20 transition-all duration-300">
+    <div class="content-container">
+    {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white/80 backdrop-blur-md border-t border-indigo-100 py-6 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 lg:px-6">
+      <div class="text-center">
+        <p class="text-gray-600 text-sm">
+          &copy; 2025 All rights reserved by 
+          <a href="https://infyrus.com" target="_blank" class="text-indigo-600 hover:text-indigo-800 font-medium transition-colors">
+            Infyrus Tech Pvt Ltd
+          </a>
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Sidebar toggle functionality
+    const menuToggle = document.getElementById('menu-toggle');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
+    const mainContent = document.getElementById('main-content');
+
+    // Initialize sidebar state based on screen size
+    function initializeSidebar() {
+      if (window.innerWidth < 1024) {
+        // Mobile: sidebar closed by default
+        sidebar.classList.remove('open');
+        sidebar.classList.add('closed');
+        mainContent.classList.add('sidebar-closed');
+      } else {
+        // Desktop: sidebar open by default
+        sidebar.classList.add('open');
+        sidebar.classList.remove('closed');
+        mainContent.classList.remove('sidebar-closed');
+      }
+    }
+
+    function toggleSidebar() {
+      if (window.innerWidth < 1024) {
+        // Mobile behavior
+        sidebar.classList.toggle('open');
+        sidebarOverlay.classList.toggle('active');
+      } else {
+        // Desktop behavior
+        sidebar.classList.toggle('closed');
+        mainContent.classList.toggle('sidebar-closed');
+      }
+    }
+
+    function closeSidebar() {
+      if (window.innerWidth < 1024) {
+        sidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('active');
+      } else {
+        sidebar.classList.add('closed');
+        mainContent.classList.add('sidebar-closed');
+      }
+    }
+
+    menuToggle.addEventListener('click', toggleSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
+
+    // User dropdown functionality
+    const userMenuButton = document.getElementById('user-menu-button');
+    const userDropdown = document.getElementById('user-dropdown');
+    const dropdownArrow = document.getElementById('dropdown-arrow');
+
+    function toggleUserDropdown() {
+      userDropdown.classList.toggle('active');
+      dropdownArrow.style.transform = userDropdown.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0deg)';
+    }
+
+    function closeUserDropdown() {
+      userDropdown.classList.remove('active');
+      dropdownArrow.style.transform = 'rotate(0deg)';
+    }
+
+    userMenuButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleUserDropdown();
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!userMenuButton.contains(e.target) && !userDropdown.contains(e.target)) {
+        closeUserDropdown();
+      }
+    });
+
+    // Close sidebar when clicking on nav links on mobile
+    const navLinks = document.querySelectorAll('#sidebar a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth < 1024) {
+          closeSidebar();
+        }
+      });
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      initializeSidebar();
+    });
+
+    // Initialize sidebar on page load
+    initializeSidebar();
+  </script>
+</body>
+
+</html>

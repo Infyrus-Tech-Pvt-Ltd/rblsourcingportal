@@ -1,0 +1,244 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-8">
+  <div class="max-w-4xl mx-auto px-6">
+    
+    <!-- Header Section -->
+    <div class="mb-8">
+      <div class="flex items-center gap-4 mb-6">
+        <a 
+          href="{{ url_for('customer_details', customer_id=customer.id) }}" 
+          class="inline-flex items-center p-2 text-gray-600 hover:text-gray-900 hover:bg-white rounded-lg transition-colors"
+          title="Back to Customer Details"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </a>
+        <div>
+          <h1 class="text-4xl font-bold text-gray-900 mb-2">Edit Customer</h1>
+          <p class="text-gray-600">Update customer information and manage attachments</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="mb-6">
+          {% for category, message in messages %}
+            <div class="mb-3 p-4 rounded-lg {% if category == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-green-50 text-green-700 border border-green-200{% endif %}">
+              <div class="flex items-center">
+                <i class="fas {% if category == 'error' %}fa-exclamation-circle{% else %}fa-check-circle{% endif %} mr-2"></i>
+                {{ message }}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Edit Form -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+      <!-- Form Header -->
+      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="h-12 w-12 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center mr-4">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-xl font-bold text-gray-900">Update Customer Information</h2>
+            <p class="text-sm text-gray-600">Modify customer details</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Body -->
+      <div class="p-8">
+        <form method="POST" class="space-y-6">
+          <!-- Basic Information Section -->
+          <div class="space-y-6">
+            <div class="border-l-4 border-blue-500 pl-4">
+              <h3 class="text-lg font-semibold text-gray-900 mb-1">Personal Information</h3>
+              <p class="text-sm text-gray-600">Basic customer details and contact information</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Customer ID (Read-only) -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  <i class="fas fa-id-card mr-2 text-gray-500"></i>
+                  Customer ID
+                </label>
+                <input type="text" value="{{ customer.customer_id }}" 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
+                       readonly>
+              </div>
+
+              <!-- Name -->
+              <div>
+                <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                  <i class="fas fa-user mr-2 text-gray-500"></i>
+                  Full Name *
+                </label>
+                <input type="text" id="name" name="name" value="{{ customer.name }}" required
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+              </div>
+
+              <!-- Email -->
+              <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                  <i class="fas fa-envelope mr-2 text-gray-500"></i>
+                  Email Address
+                </label>
+                <input type="email" id="email" name="email" value="{{ customer.email }}"
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+              </div>
+
+              <!-- Phone -->
+              <div>
+                <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
+                  <i class="fas fa-phone mr-2 text-gray-500"></i>
+                  Phone Number *
+                </label>
+                <input type="tel" id="phone" name="phone" value="{{ customer.phone }}" required
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+              </div>
+            </div>
+
+            <!-- Address -->
+            <div>
+              <label for="address" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-map-marker-alt mr-2 text-gray-500"></i>
+                Address
+              </label>
+              <textarea id="address" name="address" rows="3"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        placeholder="Complete address including city, state, and postal code">{{ customer.address }}</textarea>
+            </div>
+
+            <!-- Notes -->
+            <div>
+              <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-sticky-note mr-2 text-gray-500"></i>
+                Notes & Comments
+              </label>
+              <textarea id="notes" name="notes" rows="3"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        placeholder="Additional notes or comments about the customer">{{ customer.notes }}</textarea>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="border-t border-gray-200 pt-6">
+            <div class="flex flex-col sm:flex-row gap-3 justify-end">
+              <a href="{{ url_for('customer_details', customer_id=customer.id) }}" 
+                 class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+                <i class="fas fa-times mr-2"></i>Cancel
+              </a>
+              <button type="submit" 
+                      class="inline-flex items-center justify-center px-8 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-medium rounded-lg hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 shadow-sm transition-all">
+                <i class="fas fa-save mr-2"></i>Update Customer
+              </button>
+            </div>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+    <!-- Help Text -->
+    <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+      <div class="flex items-start">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-blue-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-blue-800">Update Information</h3>
+          <div class="mt-2 text-sm text-blue-700">
+            <ul class="list-disc pl-5 space-y-1">
+              <li>Fields marked with <span class="text-red-500 font-medium">*</span> are required</li>
+              <li>Customer ID cannot be changed once created</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Form Validation JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.querySelector('form');
+  const nameInput = document.getElementById('name');
+  const phoneInput = document.getElementById('phone');
+  const emailInput = document.getElementById('email');
+
+  // Real-time validation feedback
+  function validateField(input, isValid) {
+    if (isValid) {
+      input.classList.remove('border-red-300', 'focus:ring-red-500', 'focus:border-red-500');
+      input.classList.add('border-green-300', 'focus:ring-green-500', 'focus:border-green-500');
+    } else {
+      input.classList.remove('border-green-300', 'focus:ring-green-500', 'focus:border-green-500');
+      input.classList.add('border-red-300', 'focus:ring-red-500', 'focus:border-red-500');
+    }
+  }
+
+  // Name validation
+  nameInput.addEventListener('blur', function() {
+    validateField(this, this.value.trim().length >= 2);
+  });
+
+  // Phone validation
+  phoneInput.addEventListener('blur', function() {
+    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+    validateField(this, phoneRegex.test(this.value.replace(/\s+/g, '')));
+  });
+
+  // Email validation
+  emailInput.addEventListener('blur', function() {
+    if (this.value.trim() === '') {
+      this.classList.remove('border-red-300', 'focus:ring-red-500', 'focus:border-red-500', 'border-green-300', 'focus:ring-green-500', 'focus:border-green-500');
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    validateField(this, emailRegex.test(this.value));
+  });
+
+  // Form submission validation
+  form.addEventListener('submit', function(e) {
+    let isValid = true;
+    
+    // Validate required fields
+    if (nameInput.value.trim().length < 2) {
+      validateField(nameInput, false);
+      isValid = false;
+    }
+    
+    if (phoneInput.value.trim().length === 0) {
+      validateField(phoneInput, false);
+      isValid = false;
+    }
+    
+    if (!isValid) {
+      e.preventDefault();
+      // Scroll to first invalid field
+      const firstInvalid = document.querySelector('.border-red-300');
+      if (firstInvalid) {
+        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        firstInvalid.focus();
+      }
+    }
+  });
+});
+</script>
+
+{% endblock %}

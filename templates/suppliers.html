@@ -1,0 +1,370 @@
+{% extends "index.html" %}
+
+{% block title %}Suppliers List{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-8">
+  <div class="max-w-7xl mx-auto px-6">
+    
+    <!-- Header Section -->
+    <div class="mb-8">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <div>
+          <h1 class="text-4xl font-bold text-gray-900 mb-2">🏭 Suppliers Management</h1>
+          <p class="text-gray-600">Manage your supplier database and relationships</p>
+        </div>
+        
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 lg:grid-cols-1 gap-4 lg:gap-6">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
+            <div class="text-2xl font-bold text-blue-600">{{ total_suppliers }}</div>
+            <div class="text-sm text-gray-500">Total Suppliers</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search and Actions Bar -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+      <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+        <!-- Search Form -->
+        <form method="GET" action="{{ url_for('suppliers') }}" class="flex-1 max-w-md">
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </div>
+            <input 
+              type="text" 
+              name="search" 
+              value="{{ search_query }}" 
+              placeholder="Search suppliers..." 
+              class="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            >
+          </div>
+        </form>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-3">
+          <button 
+            onclick="window.location.reload()" 
+            class="inline-flex items-center px-4 py-3 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+          >
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            Refresh
+          </button>
+          <a 
+            href="{{ url_for('add_supplier') }}" 
+            class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-medium rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-sm transition-all"
+          >
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Add Supplier
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Supplier Table -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
+            <tr>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Supplier Info</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Email</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Contact</th>
+              <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            {% for supplier in suppliers %}
+            <tr class="hover:bg-gray-50 transition-colors">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div class="h-10 w-10 flex-shrink-0">
+                    <div class="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+                      <span class="text-sm font-medium text-white">{{ supplier.name[0].upper() }}</span>
+                    </div>
+                  </div>
+                  <div class="ml-4">
+                    <div class="text-sm font-medium text-gray-900">
+                      <a href="{{ url_for('supplier_details', supplier_id=supplier.id) }}" class="text-blue-600 hover:text-blue-800 hover:underline">
+                        {{ supplier.name }}
+                      </a>
+                    </div>
+                    <div class="text-sm text-gray-500 font-mono">
+                      ID: {{ supplier.id[:8] }}...
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ supplier.email or 'No email' }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ supplier.contact or 'No contact' }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-center">
+                <div class="flex items-center justify-center space-x-2">
+                  <button 
+                    class="edit-supplier-btn inline-flex items-center p-2 border border-transparent rounded-md text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                    title="Edit Supplier"
+                    data-id="{{ supplier.id }}"
+                    data-name="{{ supplier.name }}"
+                    data-email="{{ supplier.email or '' }}"
+                    data-contact="{{ supplier.contact or '' }}"
+                    data-address="{{ supplier.address or '' }}"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                  </button>
+                  <form method="POST" action="{{ url_for('delete_supplier') }}" class="inline" onsubmit="return confirm('Are you sure?')">
+                    <input type="hidden" name="supplier_id" value="{{ supplier.id }}">
+                    <button 
+                      type="submit" 
+                      class="inline-flex items-center p-2 border border-transparent rounded-md text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors"
+                      title="Delete Supplier"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                      </svg>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="4" class="px-6 py-12 text-center">
+                <div class="flex flex-col items-center">
+                  <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                  </svg>
+                  <h3 class="text-lg font-medium text-gray-900 mb-2">No suppliers found</h3>
+                  <p class="text-gray-500 max-w-md">Get started by adding your first supplier to the system.</p>
+                  <a 
+                    href="{{ url_for('add_supplier') }}"
+                    class="mt-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-2 px-4 rounded-lg shadow-sm transition-all duration-200 flex items-center"
+                  >
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Add First Supplier
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <div class="mt-8 flex items-center justify-between">
+      <div class="text-sm text-gray-700">
+        Page {{ current_page }} of {{ total_pages }}
+      </div>
+      <div class="flex items-center space-x-2">
+        {% if current_page > 1 %}
+        <a href="{{ url_for('suppliers', page=current_page-1, search=search_query) }}" class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+          Previous
+        </a>
+        {% else %}
+        <span class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-400 bg-gray-100 cursor-not-allowed">
+          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+          Previous
+        </span>
+        {% endif %}
+
+        {% for p in range(1, total_pages + 1) %}
+          {% if p == current_page %}
+          <span class="inline-flex items-center px-3 py-2 border border-blue-500 rounded-md text-sm font-medium text-blue-600 bg-blue-50">{{ p }}</span>
+          {% else %}
+          <a href="{{ url_for('suppliers', page=p, search=search_query) }}" class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">{{ p }}</a>
+          {% endif %}
+        {% endfor %}
+
+        {% if current_page < total_pages %}
+        <a href="{{ url_for('suppliers', page=current_page+1, search=search_query) }}" class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+          Next
+          <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </a>
+        {% else %}
+        <span class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-400 bg-gray-100 cursor-not-allowed">
+          Next
+          <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </span>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-xl shadow-2xl max-w-md w-full">
+    <div class="flex items-center justify-between p-6 border-b border-gray-200">
+      <h3 class="text-xl font-bold text-gray-900">Edit Supplier</h3>
+      <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    <div class="p-6 space-y-4">
+      <!-- Name -->
+      <div>
+        <label for="editName" class="block text-sm font-medium text-gray-700 mb-2">Supplier Name</label>
+        <input type="text" id="editName" placeholder="Supplier Name" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        <small id="nameError" class="text-red-500 text-sm hidden"></small>
+      </div>
+
+      <!-- Email -->
+      <div>
+        <label for="editEmail" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+        <input type="email" id="editEmail" placeholder="Email" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        <small id="emailError" class="text-red-500 text-sm hidden"></small>
+      </div>
+
+      <!-- Contact -->
+      <div>
+        <label for="editContact" class="block text-sm font-medium text-gray-700 mb-2">Contact</label>
+        <input type="text" id="editContact" placeholder="Contact" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        <small id="contactError" class="text-red-500 text-sm hidden"></small>
+      </div>
+
+      <!-- Address -->
+      <div>
+        <label for="editAddress" class="block text-sm font-medium text-gray-700 mb-2">Address</label>
+        <textarea id="editAddress" placeholder="Address" rows="3" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+        <small id="addressError" class="text-red-500 text-sm hidden"></small>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+        <button onclick="closeModal()" class="px-6 py-3 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">Cancel</button>
+        <button onclick="saveChanges()" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    let currentEditId = null;
+
+    // Add event listeners for edit buttons
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.edit-supplier-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                const name = this.getAttribute('data-name');
+                const email = this.getAttribute('data-email');
+                const contact = this.getAttribute('data-contact');
+                const address = this.getAttribute('data-address');
+                openEditModal(id, name, email, contact, address);
+            });
+        });
+    });
+
+    function openEditModal(id, name, email, contact, address) {
+        currentEditId = id;
+        document.getElementById("editName").value = name;
+        document.getElementById("editEmail").value = email;
+        document.getElementById("editContact").value = contact;
+        document.getElementById("editAddress").value = address;
+        document.getElementById("editModal").classList.remove("hidden");
+    }
+
+    function closeModal() {
+        document.getElementById("editModal").classList.add("hidden");
+    }
+
+    function saveChanges() {
+        const name = document.getElementById("editName").value.trim();
+        const email = document.getElementById("editEmail").value.trim();
+        const contact = document.getElementById("editContact").value.trim();
+        const address = document.getElementById("editAddress").value.trim();
+
+        // Validation patterns
+        const namePattern = /^[A-Za-z\s]+$/;
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const contactPattern = /^\d{7,15}$/;
+
+        let valid = true;
+
+        // Name validation
+        if (!namePattern.test(name)) {
+            document.getElementById("nameError").innerText = "Name must contain only letters and spaces.";
+            document.getElementById("nameError").classList.remove("hidden");
+            valid = false;
+        } else {
+            document.getElementById("nameError").classList.add("hidden");
+        }
+
+        // Email validation
+        if (email && !emailPattern.test(email)) {
+            document.getElementById("emailError").innerText = "Enter a valid email address.";
+            document.getElementById("emailError").classList.remove("hidden");
+            valid = false;
+        } else {
+            document.getElementById("emailError").classList.add("hidden");
+        }
+
+        // Contact validation
+        if (!contactPattern.test(contact)) {
+            document.getElementById("contactError").innerText = "Contact must be 7-15 digits.";
+            document.getElementById("contactError").classList.remove("hidden");
+            valid = false;
+        } else {
+            document.getElementById("contactError").classList.add("hidden");
+        }
+
+        if (!valid) return;
+
+        // Send to PocketBase
+        const formData = new FormData();
+        formData.append("name", name);
+        formData.append("email", email);
+        formData.append("contact", contact);
+        formData.append("address", address);
+
+        fetch(`http://127.0.0.1:8090/api/collections/suppliers/records/${currentEditId}`, {
+            method: "PATCH",
+            body: formData
+        })
+        .then(res => {
+            if (!res.ok) throw new Error("Failed to update supplier");
+            return res.json();
+        })
+        .then(updated => {
+            closeModal();
+            location.reload();
+        })
+        .catch(err => {
+            console.error("Error updating supplier:", err);
+            alert("Failed to update supplier. Please try again.");
+        });
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('editModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeModal();
+      }
+    });
+</script>
+{% endblock %}

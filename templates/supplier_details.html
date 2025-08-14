@@ -1,0 +1,195 @@
+{% extends "index.html" %}
+
+{% block title %}Supplier Products{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-8">
+  <div class="max-w-7xl mx-auto px-6">
+    
+    <!-- Header Section -->
+    <div class="mb-8">
+      <div class="flex items-center gap-4 mb-6">
+        <a 
+          href="{{ url_for('suppliers') }}" 
+          class="inline-flex items-center p-2 text-gray-600 hover:text-gray-900 hover:bg-white rounded-lg transition-colors"
+          title="Back to Suppliers"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </a>
+        <div>
+          <h1 class="text-4xl font-bold text-gray-900 mb-2" id="supplierName">Supplier Products</h1>
+          <p class="text-gray-600">Products supplied by this supplier</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Supplier Info Card -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8" id="supplierInfo" style="display: none;">
+      <div class="flex items-center">
+        <div class="h-12 w-12 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center mr-4">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H9m0 0H5m0 0h2M7 7h10M7 11h6"></path>
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-gray-900" id="supplierInfoName">Supplier Name</h2>
+          <p class="text-sm text-gray-600" id="supplierInfoDetails">Email • Contact</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Products Table -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="bg-gradient-to-r from-blue-50 to-blue-100 border-b border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="h-12 w-12 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg flex items-center justify-center mr-4">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-2-2H6L4 7m16 0v12a2 2 0 01-2 2H6a2 2 0 01-2-2V7m16 0H4"></path>
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-xl font-bold text-gray-900">Supplied Products</h2>
+            <p class="text-sm text-gray-600">All products available from this supplier</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200" id="productTable">
+          <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
+            <tr>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Product Name</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Price</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Created Date</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Model</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <!-- Products will be dynamically added here -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- No products message -->
+      <div id="noProductsMessage" class="hidden p-12 text-center">
+        <div class="flex flex-col items-center">
+          <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+          </svg>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">No products found</h3>
+          <p class="text-gray-500 max-w-md">This supplier doesn't have any products associated with them yet.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/pocketbase/dist/pocketbase.umd.js"></script>
+<script>
+    const supplierId = "{{ supplier_id }}";
+
+    const tbody = document.querySelector("#productTable tbody");
+    const noProductsMessage = document.getElementById("noProductsMessage");
+    const supplierInfo = document.getElementById("supplierInfo");
+    const supplierName = document.getElementById("supplierName");
+    const supplierInfoName = document.getElementById("supplierInfoName");
+    const supplierInfoDetails = document.getElementById("supplierInfoDetails");
+
+    // Fetch supplier details using our API
+    fetch(`/api/suppliers/${supplierId}/details`)
+      .then(response => response.json())
+      .then(data => {
+          if (data.error) {
+              console.error("Error fetching supplier details:", data.error);
+              supplierName.textContent = "Supplier Products";
+              return;
+          }
+          
+          const supplier = data.supplier;
+          supplierName.textContent = `${supplier.name} - Products`;
+          supplierInfoName.textContent = supplier.name;
+          
+          let details = [];
+          if (supplier.email) details.push(supplier.email);
+          if (supplier.contact) details.push(supplier.contact);
+          
+          supplierInfoDetails.textContent = details.join(' • ') || 'No contact information';
+          supplierInfo.style.display = 'block';
+      })
+      .catch(err => {
+          console.error("Error fetching supplier details:", err);
+          supplierName.textContent = "Supplier Products";
+      });
+
+    // Fetch products for this supplier using our API
+    fetch(`/api/suppliers/${supplierId}/products`)
+      .then(response => response.json())
+      .then(data => {
+          if (data.error) {
+              console.error("Error fetching products:", data.error);
+              showNoProductsMessage("Failed to load products", "Unable to fetch products for this supplier. Please try again later.");
+              return;
+          }
+          
+          const products = data.products;
+          
+          if (products.length === 0) {
+              noProductsMessage.classList.remove("hidden");
+              return;
+          }
+
+          products.forEach(p => {
+              // Format created date to show only date without time
+              const createdDate = new Date(p.created).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric'
+              });
+
+              const tr = document.createElement("tr");
+              tr.classList.add("hover:bg-gray-50", "transition-colors");
+              tr.innerHTML = `
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium text-gray-900">
+                      <a href="/product/${p.id}" class="text-blue-600 hover:text-blue-800 hover:underline">
+                        ${p.name || '-'}
+                      </a>
+                    </div>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 w-fit">
+                      ID: ${p.product_id || p.id}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    ${p.price !== undefined && p.price !== '' ? 'Rs. ' + parseFloat(p.price).toFixed(2) : '-'}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    ${createdDate}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    ${p.model || 'No model specified'}
+                  </td>
+              `;
+              tbody.appendChild(tr);
+          });
+      })
+      .catch(err => {
+          console.error("Error fetching products:", err);
+          showNoProductsMessage("Failed to load products", "Unable to fetch products for this supplier. Please try again later.");
+      });
+
+    function showNoProductsMessage(title, message) {
+        noProductsMessage.innerHTML = `
+          <div class="flex flex-col items-center">
+            <svg class="w-16 h-16 text-red-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">${title}</h3>
+            <p class="text-gray-500 max-w-md">${message}</p>
+          </div>
+        `;
+        noProductsMessage.classList.remove("hidden");
+    }
+</script>
+{% endblock %}

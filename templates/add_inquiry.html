@@ -1,0 +1,44 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow">
+  <h1 class="text-3xl font-extrabold mb-6 text-gray-900">➕ Add New Inquiry</h1>
+
+  <form method="POST" action="{{ url_for('add_inquiry') }}" class="space-y-6">
+    <!-- Select Customer -->
+    <div>
+      <label for="customer" class="block mb-2 font-semibold text-gray-700">Select Customer</label>
+      <select name="customer" id="customer" required
+        class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <option value="" disabled selected>-- Choose Customer --</option>
+        {% for customer in customers %}
+          <option value="{{ customer.id }}">{{ customer.name }} ({{ customer.email or 'No Email' }})</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Select Products -->
+    <div>
+      <label for="products" class="block mb-2 font-semibold text-gray-700">Select Products (one or more)</label>
+      <select name="products" id="products" multiple required
+        class="w-full border border-gray-300 rounded px-4 py-2 h-40 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        {% for product in products %}
+          <option value="{{ product.id }}">{{ product.name }} (ID: {{ product.id }})</option>
+        {% endfor %}
+      </select>
+      <p class="text-sm text-gray-500 mt-1">Hold Ctrl (Windows) / Cmd (Mac) to select multiple.</p>
+    </div>
+
+    <div class="flex justify-end space-x-4">
+      <a href="{{ url_for('inquiries') }}" 
+         class="px-6 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-100 transition">
+        Cancel
+      </a>
+      <button type="submit" 
+        class="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+        Create Inquiry
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

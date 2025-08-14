@@ -1,0 +1,329 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-8">
+  <div class="max-w-7xl mx-auto px-6">
+    
+    <!-- Header Section -->
+    <div class="mb-8">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <div>
+          <h1 class="text-4xl font-bold text-gray-900 mb-2">Customer Management</h1>
+          <p class="text-gray-600">Manage your customer database and track inquiries</p>
+        </div>
+        
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
+            <div class="text-2xl font-bold text-blue-600">{{ count }}</div>
+            <div class="text-sm text-gray-500">Total</div>
+          </div>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
+            <div class="text-2xl font-bold text-green-600">{{ recent_count }}</div>
+            <div class="text-sm text-gray-500">Today</div>
+          </div>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
+            <div class="text-2xl font-bold text-orange-600">{{ weekly_count }}</div>
+            <div class="text-sm text-gray-500">This Week</div>
+          </div>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
+            <div class="text-2xl font-bold text-purple-600">{{ monthly_count }}</div>
+            <div class="text-sm text-gray-500">This Month</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search and Actions Bar -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+      <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+        <!-- Search Form -->
+        <form method="GET" action="{{ url_for('customers') }}" class="flex-1 max-w-md">
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </div>
+            <input 
+              type="text" 
+              name="search" 
+              value="{{ search_query }}" 
+              placeholder="Search customers..." 
+              class="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            >
+          </div>
+        </form>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-3">
+          <button 
+            onclick="window.location.reload()" 
+            class="inline-flex items-center px-4 py-3 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+          >
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            Refresh
+          </button>
+          <a 
+            href="{{ url_for('add_customer') }}" 
+            class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-medium rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-sm transition-all"
+          >
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Add Customer
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Customer Table -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
+            <tr>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Customer ID</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Name</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Email</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Phone</th>
+              <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Inquiries</th>
+              <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            {% for customer in customers %}
+            <tr class="hover:bg-gray-50 transition-colors" data-customer-id="{{ customer.id }}">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  {{ customer.customer_id }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div class="h-10 w-10 flex-shrink-0">
+                    <div class="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+                      <span class="text-sm font-medium text-white">{{ customer.name[0].upper() }}</span>
+                    </div>
+                  </div>
+                  <div class="ml-4">
+                    <a href="{{ url_for('customer_details', customer_id=customer.id) }}" class="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline">
+                      {{ customer.name }}
+                    </a>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ customer.email or 'No email' }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ customer.phone or 'No phone' }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-center">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                  {{ customer.inquiry_count or 0 }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-center">
+                <div class="flex items-center justify-center space-x-2">
+                  <a 
+                    href="{{ url_for('edit_customer_page', customer_id=customer.id) }}" 
+                    class="inline-flex items-center p-2 border border-transparent rounded-md text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                    title="Edit Customer"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                  </a>
+                  <form method="POST" action="{{ url_for('delete_customer') }}" class="inline" onsubmit="return confirm('Are you sure?')">
+                    <input type="hidden" name="customer_id" value="{{ customer.id }}">
+                    <button 
+                      type="submit" 
+                      class="inline-flex items-center p-2 border border-transparent rounded-md text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors"
+                      title="Delete Customer"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                      </svg>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <div class="mt-8 flex items-center justify-between">
+      <div class="text-sm text-gray-700">
+        Page {{ current_page }} of {{ total_pages }}
+      </div>
+      <div class="flex items-center space-x-2">
+        {% if current_page > 1 %}
+        <a href="{{ url_for('customers', page=current_page-1, search=search_query) }}" class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+          Previous
+        </a>
+        {% else %}
+        <span class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-400 bg-gray-100 cursor-not-allowed">
+          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+          Previous
+        </span>
+        {% endif %}
+
+        {% for p in range(1, total_pages + 1) %}
+          {% if p == current_page %}
+          <span class="inline-flex items-center px-3 py-2 border border-blue-500 rounded-md text-sm font-medium text-blue-600 bg-blue-50">{{ p }}</span>
+          {% else %}
+          <a href="{{ url_for('customers', page=p, search=search_query) }}" class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">{{ p }}</a>
+          {% endif %}
+        {% endfor %}
+
+        {% if current_page < total_pages %}
+        <a href="{{ url_for('customers', page=current_page+1, search=search_query) }}" class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+          Next
+          <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </a>
+        {% else %}
+        <span class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-400 bg-gray-100 cursor-not-allowed">
+          Next
+          <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </span>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<!-- Inquiries Modal -->
+<div id="inquiriesModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden">
+    <div class="flex items-center justify-between p-6 border-b border-gray-200">
+      <h3 class="text-xl font-bold text-gray-900">Customer Inquiries</h3>
+      <button onclick="closeInquiriesModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    <div class="p-6 overflow-y-auto" id="inquiriesContent">
+      <!-- Dynamic content will be loaded here -->
+    </div>
+  </div>
+</div>
+
+<!-- Details Modal -->
+<div id="detailsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-xl shadow-2xl max-w-md w-full">
+    <div class="flex items-center justify-between p-6 border-b border-gray-200">
+      <h3 class="text-xl font-bold text-gray-900">Customer Details</h3>
+      <button onclick="closeDetailsModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    <div class="p-6">
+      <pre id="detailsContent" class="whitespace-pre-wrap text-sm text-gray-700 font-mono bg-gray-50 p-4 rounded-lg"></pre>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Show inquiries for a customer
+  function showCustomerInquiries(customerId, customerName) {
+    fetch(`/api/inquiries?customer_id=${customerId}`)
+      .then(res => res.json())
+      .then(data => {
+        let inquiries = data.items || [];
+        let html = `<h3 class='text-lg font-bold mb-4 text-gray-900'>Inquiries for ${customerName}</h3>`;
+        if (inquiries.length === 0) {
+          html += `<div class='text-gray-500 text-center py-8'>No inquiries found for this customer.</div>`;
+        } else {
+          html += `<div class='space-y-3'>`;
+          inquiries.forEach(iq => {
+            html += `
+              <div class='bg-gray-50 rounded-lg p-4 border border-gray-200'>
+                <div class='flex items-center justify-between mb-2'>
+                  <span class='font-semibold text-gray-900'>ID: ${iq.id}</span>
+                  <span class='px-2 py-1 text-xs font-medium rounded-full ${iq.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}'>${iq.status}</span>
+                </div>
+                <div class='text-sm text-gray-600'>
+                  <div><strong>Product:</strong> ${iq.product_name}</div>
+                  <div><strong>Quantity:</strong> ${iq.quantity}</div>
+                </div>
+              </div>
+            `;
+          });
+          html += `</div>`;
+        }
+        showInquiriesModal(html);
+      })
+      .catch(() => showInquiriesModal('<div class="text-red-500 text-center py-8">Failed to load inquiries.</div>'));
+  }
+
+  function showInquiriesModal(contentHtml) {
+    let modal = document.getElementById('inquiriesModal');
+    let contentDiv = document.getElementById('inquiriesContent');
+    contentDiv.innerHTML = contentHtml;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  function closeInquiriesModal() {
+    let modal = document.getElementById('inquiriesModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+
+  // Customer Details Modal
+  function openDetailsModal(customer) {
+    const modal = document.getElementById('detailsModal');
+    const contentDiv = document.getElementById('detailsContent');
+
+    let detailsText = '';
+    detailsText += `Customer ID: ${customer.customer_id || 'N/A'}\n`;
+    detailsText += `Name: ${customer.name || 'N/A'}\n`;
+    detailsText += `Email: ${customer.email || 'N/A'}\n`;
+    detailsText += `Phone: ${customer.phone || 'N/A'}\n`;
+    detailsText += `Address: ${customer.address || 'N/A'}\n`;
+    detailsText += `Notes: ${customer.notes || 'N/A'}\n`;
+
+    contentDiv.textContent = detailsText;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  function closeDetailsModal() {
+    const modal = document.getElementById('detailsModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+
+  // Close modals when clicking outside
+  document.getElementById('inquiriesModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeInquiriesModal();
+    }
+  });
+
+  document.getElementById('detailsModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeDetailsModal();
+    }
+  });
+</script>
+
+{% endblock %}

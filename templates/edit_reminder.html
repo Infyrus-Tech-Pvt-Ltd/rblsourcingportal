@@ -1,0 +1,372 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-8">
+  <div class="max-w-3xl mx-auto px-6">
+    
+    <!-- Header Section -->
+    <div class="mb-8">
+      <div class="flex items-center mb-6">
+        <a href="/reminders" class="inline-flex items-center text-gray-600 hover:text-gray-900 mr-4 transition-colors">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+          Back to Reminders
+        </a>
+      </div>
+      
+      <div>
+        <h1 class="text-4xl font-bold text-gray-900 mb-2">✏️ Edit Reminder</h1>
+        <p class="text-gray-600">Update your reminder details and schedule</p>
+      </div>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+      
+      <!-- Form Header -->
+      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="h-12 w-12 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center mr-4">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-xl font-bold text-gray-900">Edit Reminder</h2>
+            <p class="text-sm text-gray-600">Update your reminder details and schedule</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Form Body -->
+      <div class="p-8">
+        <form method="POST" action="/edit_reminder/{{ reminder.id }}">
+        <div class="grid grid-cols-1 gap-6">
+          
+          <!-- Reminder Details Section -->
+          <div class="space-y-6">
+            <div>
+              <h4 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4 flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Reminder Details
+              </h4>
+            </div>
+            
+            <div>
+              <label for="topic" class="block text-sm font-medium text-gray-700 mb-2">
+                Subject <span class="text-red-500">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="topic" 
+                name="topic" 
+                value="{{ reminder.topic }}"
+                required 
+                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                placeholder="Enter reminder subject"
+              >
+            </div>
+            
+            <div>
+              <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+                Description <span class="text-red-500">*</span>
+              </label>
+              <textarea 
+                id="description" 
+                name="description" 
+                rows="4" 
+                required
+                class="w-full px-4 py-3 border border-gray-200 rounded-lg resize-y focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                placeholder="Enter detailed description of the reminder..."
+              >{{ reminder.description }}</textarea>
+            </div>
+          </div>
+
+          <!-- Schedule Section -->
+          <div class="border-t border-gray-200 pt-6">
+            <div>
+              <h4 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4 flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                Schedule & Delivery
+              </h4>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label for="datetime" class="block text-sm font-medium text-gray-700 mb-2">
+                  Date & Time (Nepal Time) <span class="text-red-500">*</span>
+                </label>
+                <input 
+                  type="datetime-local" 
+                  id="datetime" 
+                  name="datetime" 
+                  data-utc-value="{{ reminder.datetime }}"
+                  required
+                  class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                >
+                <p class="text-xs text-gray-500 mt-1">When you want to receive this reminder (Nepal Time)</p>
+              </div>
+              
+              <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                  Email Address <span class="text-red-500">*</span>
+                </label>
+                <input 
+                  type="email" 
+                  id="email" 
+                  name="email" 
+                  value="{{ reminder.email }}"
+                  required 
+                  class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  placeholder="Enter email address"
+                >
+                <p class="text-xs text-gray-500 mt-1">The reminder notification will be sent here</p>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="border-t border-gray-200 pt-6 mt-8">
+          <div class="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-3 space-y-3 space-y-reverse sm:space-y-0">
+            <a 
+              href="/reminders" 
+              class="inline-flex justify-center items-center px-6 py-3 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+            >
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+              Cancel
+            </a>
+            <button 
+              type="submit" 
+              class="inline-flex justify-center items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-medium rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-sm transition-all"
+            >
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Update Reminder
+            </button>
+          </div>
+        </div>
+        </form>
+      </div>
+    </div>
+    
+    <!-- Current Status Card -->
+    <div class="mt-8 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <h4 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4 flex items-center">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        Current Status
+      </h4>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+        <div>
+          <span class="font-medium text-gray-700">Reminder ID:</span>
+          <span class="text-gray-600 font-mono block">{{ reminder.id }}</span>
+        </div>
+        <div>
+          <span class="font-medium text-gray-700">Status:</span>
+          <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ 'bg-green-100 text-green-800' if reminder.sent else 'bg-yellow-100 text-yellow-800' }}">
+            {{ 'Sent' if reminder.sent else 'Pending' }}
+          </span>
+        </div>
+        <div>
+          <span class="font-medium text-gray-700">Created:</span>
+          <span class="text-gray-600">{{ reminder.created }}</span>
+        </div>
+      </div>
+      
+      {% if reminder.sent %}
+      <div class="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+        <p class="text-sm text-green-800">
+          <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+          </svg>
+          <strong>Note:</strong> This reminder has already been sent. Updating it will reset the status to pending and it will be sent again at the new scheduled time.
+        </p>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Nepal timezone utility functions
+function convertUTCToNepalTime(utcTimeString) {
+  if (!utcTimeString) return '';
+  
+  try {
+    // Parse the UTC time string
+    let utcDate;
+    if (utcTimeString.includes('T')) {
+      // Handle ISO format: "2025-01-15T10:30"
+      utcDate = new Date(utcTimeString + 'Z'); // Add Z to indicate UTC
+    } else {
+      // Handle other formats
+      utcDate = new Date(utcTimeString + ' UTC');
+    }
+    
+    // Check if date is valid
+    if (isNaN(utcDate.getTime())) {
+      return utcTimeString; // Return original if parsing fails
+    }
+    
+    // Nepal is UTC+5:45
+    const nepalOffset = 5 * 60 + 45; // 5 hours 45 minutes in minutes
+    const nepalTime = new Date(utcDate.getTime() + (nepalOffset * 60 * 1000));
+    
+    // Format for datetime-local input
+    const year = nepalTime.getUTCFullYear();
+    const month = String(nepalTime.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(nepalTime.getUTCDate()).padStart(2, '0');
+    const hours = String(nepalTime.getUTCHours()).padStart(2, '0');
+    const minutes = String(nepalTime.getUTCMinutes()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  } catch (error) {
+    console.error('Error converting time:', error);
+    return utcTimeString; // Return original if conversion fails
+  }
+}
+
+function convertNepalTimeToUTC(nepalTimeString) {
+  if (!nepalTimeString) return '';
+  
+  try {
+    // Parse the Nepal time string (assumes format: "2025-01-15T10:30")
+    const nepalDate = new Date(nepalTimeString);
+    
+    // Check if date is valid
+    if (isNaN(nepalDate.getTime())) {
+      return nepalTimeString;
+    }
+    
+    // Nepal is UTC+5:45, so subtract to get UTC
+    const nepalOffset = 5 * 60 + 45; // 5 hours 45 minutes in minutes
+    const utcTime = new Date(nepalDate.getTime() - (nepalOffset * 60 * 1000));
+    
+    // Format as UTC time for server
+    const year = utcTime.getFullYear();
+    const month = String(utcTime.getMonth() + 1).padStart(2, '0');
+    const day = String(utcTime.getDate()).padStart(2, '0');
+    const hours = String(utcTime.getHours()).padStart(2, '0');
+    const minutes = String(utcTime.getMinutes()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  } catch (error) {
+    console.error('Error converting Nepal time to UTC:', error);
+    return nepalTimeString;
+  }
+}
+
+// Set minimum datetime to current time and convert existing UTC time to Nepal time
+document.addEventListener('DOMContentLoaded', function() {
+  const datetimeInput = document.getElementById('datetime');
+  
+  if (datetimeInput) {
+    // Convert the existing UTC value to Nepal time
+    const utcValue = datetimeInput.getAttribute('data-utc-value');
+    if (utcValue) {
+      const nepalTime = convertUTCToNepalTime(utcValue);
+      datetimeInput.value = nepalTime;
+    }
+    
+    // Set minimum datetime to current Nepal time
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    
+    const currentDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+    datetimeInput.min = currentDateTime;
+  }
+});
+
+// Form validation and submission
+document.querySelector('form').addEventListener('submit', function(e) {
+  const topic = document.getElementById('topic').value.trim();
+  const description = document.getElementById('description').value.trim();
+  const datetime = document.getElementById('datetime').value;
+  const email = document.getElementById('email').value.trim();
+  
+  if (!topic) {
+    e.preventDefault();
+    alert('Please enter a subject for the reminder.');
+    return false;
+  }
+  
+  if (!description) {
+    e.preventDefault();
+    alert('Please enter a description for the reminder.');
+    return false;
+  }
+  
+  if (!datetime) {
+    e.preventDefault();
+    alert('Please select a date and time for the reminder.');
+    return false;
+  }
+  
+  if (!email || !email.includes('@')) {
+    e.preventDefault();
+    alert('Please enter a valid email address.');
+    return false;
+  }
+  
+  // Check if selected time is in the future (Nepal time)
+  const selectedTime = new Date(datetime);
+  const currentTime = new Date();
+  
+  if (selectedTime <= currentTime) {
+    if (!confirm('The selected time is in the past. The reminder will be sent immediately. Do you want to continue?')) {
+      e.preventDefault();
+      return false;
+    }
+  }
+  
+  // Convert Nepal time to UTC before submitting
+  const utcDateTime = convertNepalTimeToUTC(datetime);
+  
+  // Create hidden input with UTC time
+  const hiddenInput = document.createElement('input');
+  hiddenInput.type = 'hidden';
+  hiddenInput.name = 'datetime_utc';
+  hiddenInput.value = utcDateTime;
+  this.appendChild(hiddenInput);
+  
+  // Disable the original datetime input so it doesn't get submitted
+  document.getElementById('datetime').disabled = true;
+});
+
+// Real-time email validation
+document.getElementById('email').addEventListener('input', function() {
+  const email = this.value;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  
+  if (email && !emailRegex.test(email)) {
+    this.setCustomValidity('Please enter a valid email address');
+    this.classList.add('border-red-500');
+    this.classList.remove('border-gray-200');
+  } else {
+    this.setCustomValidity('');
+    this.classList.remove('border-red-500');
+    this.classList.add('border-gray-200');
+  }
+});
+</script>
+  }
+});
+</script>
+
+{% endblock %}

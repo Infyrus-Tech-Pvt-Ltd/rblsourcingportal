@@ -1,0 +1,519 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-8">
+  <div class="max-w-7xl mx-auto px-6">
+    
+    <!-- Header Section -->
+    <div class="mb-8">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <div>
+          <h1 class="text-4xl font-bold text-gray-900 mb-2">⌚ Reminder Management</h1>
+          <p class="text-gray-600">Schedule and manage your important reminders</p>
+        </div>
+        
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
+            <div class="text-2xl font-bold text-blue-600">{{ reminders|length }}</div>
+            <div class="text-sm text-gray-500">Total</div>
+          </div>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
+            <div class="text-2xl font-bold text-green-600">{{ reminders|selectattr('sent', 'equalto', true)|list|length }}</div>
+            <div class="text-sm text-gray-500">Sent</div>
+          </div>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
+            <div class="text-2xl font-bold text-orange-600">{{ reminders|selectattr('sent', 'equalto', false)|list|length }}</div>
+            <div class="text-sm text-gray-500">Pending</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      
+      <!-- Add New Reminder Form -->
+      <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+        
+        <!-- Form Header -->
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200 p-6">
+          <div class="flex items-center">
+            <div class="h-12 w-12 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center mr-4">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-xl font-bold text-gray-900">Create New Reminder</h2>
+              <p class="text-sm text-gray-600">Schedule a new reminder notification</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Form Body -->
+        <div class="p-8">
+          <form action="{{ url_for('add_reminder') }}" method="POST" class="space-y-6" id="reminderForm" autocomplete="off">
+          <div>
+            <label for="topic" class="block text-sm font-medium text-gray-700 mb-2">
+              Subject <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="topic"
+              name="topic"
+              placeholder="Enter reminder subject"
+              required
+              class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            />
+          </div>
+
+          <div>
+            <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+              Description <span class="text-red-500">*</span>
+            </label>
+            <textarea 
+              id="description" 
+              name="description" 
+              rows="4" 
+              required
+              placeholder="Enter detailed description of the reminder..."
+              class="w-full px-4 py-3 border border-gray-200 rounded-lg resize-y focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            ></textarea>
+          </div>
+
+          <div>
+            <label for="datetime" class="block text-sm font-medium text-gray-700 mb-2">
+              Date & Time (Nepal Time) <span class="text-red-500">*</span>
+            </label>
+            <input 
+              type="datetime-local" 
+              id="datetime" 
+              name="datetime" 
+              required
+              class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            />
+            <p class="text-xs text-gray-500 mt-1">Select when you want to receive this reminder (Nepal Time)</p>
+          </div>
+
+          <div>
+            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+              Email Address <span class="text-red-500">*</span>
+            </label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              placeholder="Enter email address"
+              required
+              class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            />
+            <p class="text-xs text-gray-500 mt-1">The reminder notification will be sent to this email</p>
+          </div>
+
+          <div class="pt-4">
+            <button 
+              type="submit"
+              class="w-full inline-flex justify-center items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-medium rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-sm transition-all"
+            >
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              Set Reminder
+            </button>
+          </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Current Reminders List -->
+      <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+        
+        <!-- List Header -->
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200 p-6">
+          <div class="flex items-center">
+            <div class="h-12 w-12 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center mr-4">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-xl font-bold text-gray-900">Current Reminders</h2>
+              <p class="text-sm text-gray-600">Your scheduled reminders</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="max-h-96 overflow-y-auto">
+          {% if reminders %}
+            <div class="divide-y divide-gray-200">
+              {% for r in reminders %}
+                {% if not r.sent %}
+              <div class="p-6 hover:bg-gray-50 transition-colors">
+                <div class="flex items-start justify-between">
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center mb-2">
+                      <h4 class="text-sm font-semibold text-gray-900 truncate">{{ r.topic }}</h4>
+                      <span class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ 'bg-green-100 text-green-800' if r.sent else 'bg-yellow-100 text-yellow-800' }}">
+                        {{ 'Sent' if r.sent else 'Pending' }}
+                      </span>
+                    </div>
+                    
+                    <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ r.description }}</p>
+                    
+                    <div class="flex items-center text-xs text-gray-500 space-x-4">
+                      <div class="flex items-center">
+                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="utc-time" data-utc="{{ r.datetime }}"></span>{{ r.datetime }}</span>
+                      </div>
+                      <div class="flex items-center">
+                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
+                        </svg>
+                        {{ r.email }}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="ml-4 flex-shrink-0">
+                    <div class="flex items-center space-x-2">
+                      <a 
+                        href="/edit_reminder/{{ r.id }}"
+                        class="inline-flex items-center p-2 border border-transparent rounded-md text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                        title="Edit Reminder"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                      </a>
+                      <form action="{{ url_for('delete_reminder', reminder_id=r.id) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this reminder?')">
+                        <button 
+                          type="submit" 
+                          class="inline-flex items-center p-2 border border-transparent rounded-md text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors"
+                          title="Delete Reminder"
+                        >
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                          </svg>
+                        </button>
+                      </form>
+                    </div>
+                  </div>  
+                </div>
+              </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="p-12 text-center">
+              <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <h3 class="text-lg font-medium text-gray-900 mb-2">No reminders found</h3>
+              <p class="text-gray-500 mb-4">You haven't created any reminders yet.</p>
+              <p class="text-sm text-gray-400">Create your first reminder using the form on the left.</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Full Reminders Table for larger screens -->
+    <div class="mt-8 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+      
+      <!-- Table Header -->
+      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="h-12 w-12 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center mr-4">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-xl font-bold text-gray-900">📋 All Reminders</h2>
+            <p class="text-sm text-gray-600">Complete list of your scheduled reminders</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
+            <tr>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Subject</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Description</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Date & Time</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Email</th>
+              <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            {% if reminders %}
+              {% for r in reminders %}
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-gray-900">{{ r.topic }}</div>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="text-sm text-gray-600 max-w-xs truncate" title="{{ r.description }}">
+                    {{ r.description }}
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900 font-mono">
+                    <span class="utc-time" data-utc="{{ r.datetime }}">{{ r.datetime }}</span>
+                    <div class="text-xs text-gray-500 mt-1">(Nepal Time)</div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-600">{{ r.email }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ 'bg-green-100 text-green-800' if r.sent else 'bg-yellow-100 text-yellow-800' }}">
+                    {% if r.sent %}
+                      <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                      </svg>
+                      Sent
+                    {% else %}
+                      <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                      </svg>
+                      Pending
+                    {% endif %}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">
+                  <div class="flex items-center justify-center space-x-2">
+
+                    {% if not r.sent %}
+                    <a 
+                      href="/edit_reminder/{{ r.id }}"
+                      class="inline-flex items-center p-2 border border-transparent rounded-md text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                      title="Edit Reminder"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                      </svg>
+                    </a>
+                    {% endif %}
+
+                    <form action="{{ url_for('delete_reminder', reminder_id=r.id) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this reminder?')">
+                      <button 
+                        type="submit" 
+                        class="inline-flex items-center p-2 border border-transparent rounded-md text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors"
+                        title="Delete Reminder"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="6" class="px-6 py-12 text-center">
+                  <div class="flex flex-col items-center">
+                    <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">No reminders found</h3>
+                    <p class="text-gray-500">Create your first reminder to get started.</p>
+                  </div>
+                </td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Nepal timezone utility functions
+function convertUTCToNepalTime(utcTimeString) {
+  if (!utcTimeString) return '';
+  
+  try {
+    // Parse the UTC time string
+    let utcDate;
+    if (utcTimeString.includes('T')) {
+      // Handle ISO format: "2025-01-15T10:30"
+      utcDate = new Date(utcTimeString + 'Z'); // Add Z to indicate UTC
+    } else {
+      // Handle other formats
+      utcDate = new Date(utcTimeString + ' UTC');
+    }
+    
+    // Check if date is valid
+    if (isNaN(utcDate.getTime())) {
+      return utcTimeString; // Return original if parsing fails
+    }
+    
+    // Nepal is UTC+5:45
+    const nepalOffset = 5 * 60 + 45; // 5 hours 45 minutes in minutes
+    const nepalTime = new Date(utcDate.getTime() + (nepalOffset * 60 * 1000));
+    
+    // Format as Nepal time
+    const year = nepalTime.getUTCFullYear();
+    const month = String(nepalTime.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(nepalTime.getUTCDate()).padStart(2, '0');
+    const hours = String(nepalTime.getUTCHours()).padStart(2, '0');
+    const minutes = String(nepalTime.getUTCMinutes()).padStart(2, '0');
+    
+    return `${year}-${month}-${day} ${hours}:${minutes}`;
+  } catch (error) {
+    console.error('Error converting time:', error);
+    return utcTimeString; // Return original if conversion fails
+  }
+}
+
+function convertNepalTimeToUTC(nepalTimeString) {
+  if (!nepalTimeString) return '';
+  
+  try {
+    // Parse the Nepal time string (assumes format: "2025-01-15T10:30")
+    const nepalDate = new Date(nepalTimeString);
+    
+    // Check if date is valid
+    if (isNaN(nepalDate.getTime())) {
+      return nepalTimeString;
+    }
+    
+    // Nepal is UTC+5:45, so subtract to get UTC
+    const nepalOffset = 5 * 60 + 45; // 5 hours 45 minutes in minutes
+    const utcTime = new Date(nepalDate.getTime() - (nepalOffset * 60 * 1000));
+    
+    // Format as UTC time for server
+    const year = utcTime.getFullYear();
+    const month = String(utcTime.getMonth() + 1).padStart(2, '0');
+    const day = String(utcTime.getDate()).padStart(2, '0');
+    const hours = String(utcTime.getHours()).padStart(2, '0');
+    const minutes = String(utcTime.getMinutes()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  } catch (error) {
+    console.error('Error converting Nepal time to UTC:', error);
+    return nepalTimeString;
+  }
+}
+
+// Convert all UTC times to Nepal time on page load
+document.addEventListener('DOMContentLoaded', function() {
+  // Convert displayed times
+  const utcTimeElements = document.querySelectorAll('.utc-time');
+  utcTimeElements.forEach(element => {
+    const utcTime = element.getAttribute('data-utc');
+    const nepalTime = convertUTCToNepalTime(utcTime);
+    element.textContent = nepalTime;
+  });
+  
+  // Set minimum datetime to current Nepal time
+  const datetimeInput = document.getElementById('datetime');
+  if (datetimeInput) {
+    const now = new Date();
+    
+    // Format current datetime for datetime-local input (in Nepal time)
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    
+    const currentDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+    datetimeInput.min = currentDateTime;
+    
+    // Set default value to current time + 1 hour (in Nepal time)
+    now.setHours(now.getHours() + 1);
+    const defaultYear = now.getFullYear();
+    const defaultMonth = String(now.getMonth() + 1).padStart(2, '0');
+    const defaultDay = String(now.getDate()).padStart(2, '0');
+    const defaultHours = String(now.getHours()).padStart(2, '0');
+    const defaultMinutes = String(now.getMinutes()).padStart(2, '0');
+    
+    const defaultDateTime = `${defaultYear}-${defaultMonth}-${defaultDay}T${defaultHours}:${defaultMinutes}`;
+    datetimeInput.value = defaultDateTime;
+  }
+});
+
+// Form validation and submission
+document.getElementById('reminderForm').addEventListener('submit', function(e) {
+  const topic = document.getElementById('topic').value.trim();
+  const description = document.getElementById('description').value.trim();
+  const datetime = document.getElementById('datetime').value;
+  const email = document.getElementById('email').value.trim();
+  
+  if (!topic) {
+    e.preventDefault();
+    alert('Please enter a subject for the reminder.');
+    return false;
+  }
+  
+  if (!description) {
+    e.preventDefault();
+    alert('Please enter a description for the reminder.');
+    return false;
+  }
+  
+  if (!datetime) {
+    e.preventDefault();
+    alert('Please select a date and time for the reminder.');
+    return false;
+  }
+  
+  if (!email || !email.includes('@')) {
+    e.preventDefault();
+    alert('Please enter a valid email address.');
+    return false;
+  }
+  
+  // Check if selected time is in the future (Nepal time)
+  const selectedTime = new Date(datetime);
+  const currentTime = new Date();
+  
+  if (selectedTime <= currentTime) {
+    e.preventDefault();
+    alert('Please select a future date and time for the reminder.');
+    return false;
+  }
+  
+  // Convert Nepal time to UTC before submitting
+  const utcDateTime = convertNepalTimeToUTC(datetime);
+  
+  // Create hidden input with UTC time
+  const hiddenInput = document.createElement('input');
+  hiddenInput.type = 'hidden';
+  hiddenInput.name = 'datetime_utc';
+  hiddenInput.value = utcDateTime;
+  this.appendChild(hiddenInput);
+  
+  // Disable the original datetime input so it doesn't get submitted
+  document.getElementById('datetime').disabled = true;
+});
+
+// Real-time email validation
+document.getElementById('email').addEventListener('input', function() {
+  const email = this.value;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  
+  if (email && !emailRegex.test(email)) {
+    this.setCustomValidity('Please enter a valid email address');
+    this.classList.add('border-red-500');
+    this.classList.remove('border-gray-200');
+  } else {
+    this.setCustomValidity('');
+    this.classList.remove('border-red-500');
+    this.classList.add('border-gray-200');
+  }
+});
+</script>
+
+{% endblock %}

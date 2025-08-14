@@ -1,0 +1,189 @@
+{% extends "index.html" %}
+
+{% block content %}
+<h2 class="text-3xl font-extrabold mb-10 text-gray-900 tracking-tight">📊 Dashboard Overview</h2>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+  <div class="bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-shadow duration-300 cursor-default">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-xl font-semibold text-gray-800">Total Customers</h3>
+      <span class="bg-indigo-100 text-indigo-700 rounded-full px-3 py-1 text-sm font-semibold select-none">Monthly</span>
+    </div>
+    <p class="text-5xl font-extrabold text-indigo-600">{{ recent_customers }}</p>
+  </div>
+
+  <div class="bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-shadow duration-300 cursor-default">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-xl font-semibold text-gray-800">Total Inquiries</h3>
+      <span class="bg-yellow-100 text-yellow-700 rounded-full px-3 py-1 text-sm font-semibold select-none">Monthly</span>
+    </div>
+    <p class="text-5xl font-extrabold text-yellow-600">{{ new_inquiries }}</p>
+  </div>
+
+  <div class="bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-shadow duration-300 cursor-default">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-xl font-semibold text-gray-800">Total Suppliers</h3>
+      <span class="bg-green-100 text-green-700 rounded-full px-3 py-1 text-sm font-semibold select-none">Monthly</span>
+    </div>
+    <p class="text-5xl font-extrabold text-green-600">{{ orders }}</p>
+  </div>
+</div>
+
+<!-- Charts Section -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+  <!-- Customer vs Inquiries Chart -->
+  <div class="bg-white p-8 rounded-3xl shadow-lg">
+    <h3 class="text-xl font-semibold text-gray-800 mb-6">Customer Inquiries Distribution</h3>
+    <div class="relative h-80">
+      <canvas id="customerInquiryChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Customer vs Amount Chart -->
+  <div class="bg-white p-8 rounded-3xl shadow-lg">
+    <h3 class="text-xl font-semibold text-gray-800 mb-6">Customer Amount Distribution</h3>
+    <div class="relative h-80">
+      <canvas id="customerAmountChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Customer Inquiry Data
+    const customerInquiryData = {{ customer_inquiry_data | tojson }};
+    const customerAmountData = {{ customer_amount_data | tojson }};
+
+    // Customer vs Inquiries Chart
+    const ctx1 = document.getElementById('customerInquiryChart').getContext('2d');
+    new Chart(ctx1, {
+        type: 'bar',
+        data: {
+            labels: customerInquiryData.map(item => item.customer),
+            datasets: [{
+                label: 'Number of Inquiries',
+                data: customerInquiryData.map(item => item.inquiries),
+                backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                borderColor: 'rgba(59, 130, 246, 1)',
+                borderWidth: 2,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    cornerRadius: 8
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        maxRotation: 45,
+                        minRotation: 0,
+                        font: {
+                            size: 11
+                        }
+                    },
+                    grid: {
+                        display: false
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    }
+                }
+            },
+            animation: {
+                duration: 1000,
+                easing: 'easeOutQuart'
+            }
+        }
+    });
+
+    // Customer vs Amount Chart
+    const ctx2 = document.getElementById('customerAmountChart').getContext('2d');
+    new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+            labels: customerAmountData.map(item => item.customer),
+            datasets: [{
+                label: 'Total Amount (Rs )',
+                data: customerAmountData.map(item => item.amount),
+                backgroundColor: [
+                    'rgba(239, 68, 68, 0.8)',
+                    'rgba(245, 158, 11, 0.8)',
+                    'rgba(34, 197, 94, 0.8)',
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(147, 51, 234, 0.8)',
+                    'rgba(236, 72, 153, 0.8)',
+                    'rgba(20, 184, 166, 0.8)',
+                    'rgba(251, 146, 60, 0.8)',
+                    'rgba(99, 102, 241, 0.8)',
+                    'rgba(244, 63, 94, 0.8)'
+                ],
+                borderColor: [
+                    'rgba(239, 68, 68, 1)',
+                    'rgba(245, 158, 11, 1)',
+                    'rgba(34, 197, 94, 1)',
+                    'rgba(59, 130, 246, 1)',
+                    'rgba(147, 51, 234, 1)',
+                    'rgba(236, 72, 153, 1)',
+                    'rgba(20, 184, 166, 1)',
+                    'rgba(251, 146, 60, 1)',
+                    'rgba(99, 102, 241, 1)',
+                    'rgba(244, 63, 94, 1)'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        usePointStyle: true,
+                        font: {
+                            size: 11
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    cornerRadius: 8,
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.parsed;
+                            return `${context.label}: Rs.   ${value.toFixed(2)}`;
+                        }
+                    }
+                }
+            },
+            animation: {
+                duration: 1500,
+                easing: 'easeOutQuart'
+            }
+        }
+    });
+});
+</script>
+
+{% endblock %}
