@@ -13,9 +13,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application files
 COPY . .
 
-# Make pocketbase executable - THIS IS THE KEY FIX
-RUN chmod +x ./backend/pocketbase
-
 # Expose the required ports
 EXPOSE 8090
 EXPOSE 5050
