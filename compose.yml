@@ -7,6 +7,4 @@ services:
       - "5050:5050"
     env_file:
       - .env
-    volumes:
-      - ./app-data:/app
     restart: unless-stopped
