@@ -1,3 +1,6 @@
+// filepath: .gitignore
 venv/
 __pycache__/
 .env
+# Keep GitHub workflows
+!.github/
