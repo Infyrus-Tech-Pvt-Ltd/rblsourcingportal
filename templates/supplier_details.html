@@ -27,15 +27,27 @@
 
     <!-- Supplier Info Card -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8" id="supplierInfo" style="display: none;">
-      <div class="flex items-center">
-        <div class="h-12 w-12 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center mr-4">
-          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H9m0 0H5m0 0h2M7 7h10M7 11h6"></path>
-          </svg>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <div class="h-12 w-12 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center mr-4">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H9m0 0H5m0 0h2M7 7h10M7 11h6"></path>
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-xl font-bold text-gray-900" id="supplierInfoName">Supplier Name</h2>
+            <p class="text-sm text-gray-600" id="supplierInfoDetails">Email • Contact</p>
+          </div>
         </div>
-        <div>
-          <h2 class="text-xl font-bold text-gray-900" id="supplierInfoName">Supplier Name</h2>
-          <p class="text-sm text-gray-600" id="supplierInfoDetails">Email • Contact</p>
+        <div class="flex items-center space-x-3">
+          <a href="#" id="editSupplierBtn" 
+             class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+             style="display: none;">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+            </svg>
+            Edit Supplier
+          </a>
         </div>
       </div>
     </div>
@@ -96,6 +108,7 @@
     const supplierName = document.getElementById("supplierName");
     const supplierInfoName = document.getElementById("supplierInfoName");
     const supplierInfoDetails = document.getElementById("supplierInfoDetails");
+    const editSupplierBtn = document.getElementById("editSupplierBtn");
 
     // Fetch supplier details using our API
     fetch(`/api/suppliers/${supplierId}/details`)
@@ -116,6 +129,11 @@
           if (supplier.contact) details.push(supplier.contact);
           
           supplierInfoDetails.textContent = details.join(' • ') || 'No contact information';
+          
+          // Set the edit button URL and show it
+          editSupplierBtn.href = `/supplier/${supplierId}/edit`;
+          editSupplierBtn.style.display = 'inline-flex';
+          
           supplierInfo.style.display = 'block';
       })
       .catch(err => {

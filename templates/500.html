@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Error - RBL Sourcing Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='logo.jpg') }}">
+    <style>
+        .animate-pulse-slow {
+            animation: pulse 3s infinite;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center px-4">
+    <div class="max-w-md w-full bg-white rounded-lg shadow-2xl p-8 text-center">
+        <!-- Logo -->
+        <div class="mb-6">
+            <img src="{{ url_for('static', filename='logo.jpg') }}" alt="RBL Sourcing" class="mx-auto h-16 w-auto">
+        </div>
+        
+        <!-- 500 Icon -->
+        <div class="mb-6">
+            <div class="inline-flex items-center justify-center w-24 h-24 bg-red-100 rounded-full animate-pulse-slow">
+                <svg class="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+        </div>
+        
+        <!-- Error Message -->
+        <h1 class="text-4xl font-bold text-gray-800 mb-2">500</h1>
+        <h2 class="text-xl font-semibold text-gray-600 mb-4">Internal Server Error</h2>
+        <p class="text-gray-500 mb-8">
+            Oops! Something went wrong on our end. Our team has been notified and is working to fix this issue.
+            Please try again in a few moments.
+        </p>
+        
+        <!-- Action Buttons -->
+        <div class="space-y-3">
+            <button onclick="location.reload()" 
+                    class="w-full inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition duration-200">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                Try Again
+            </button>
+            
+            <a href="{{ url_for('dashboard') }}" 
+               class="w-full inline-flex items-center justify-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition duration-200">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
+                Go to Dashboard
+            </a>
+        </div>
+        
+        <!-- Help Section -->
+        <div class="mt-8 pt-6 border-t border-gray-200">
+            <p class="text-sm text-gray-500 mb-3">If the problem persists:</p>
+            <div class="flex flex-col space-y-2 text-sm">
+                <span class="text-gray-600">• Check your internet connection</span>
+                <span class="text-gray-600">• Clear your browser cache</span>
+                <span class="text-gray-600">• Contact system administrator</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="absolute bottom-4 left-0 right-0 text-center">
+        <p class="text-white text-sm opacity-75">
+            &copy; {{ current_year or 2025 }} RBL Sourcing Portal. All rights reserved.
+        </p>
+    </div>
+</body>
+</html>

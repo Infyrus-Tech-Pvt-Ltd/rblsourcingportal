@@ -1572,6 +1572,50 @@ def get_supplier_products(supplier_id):
         print(f"Error in /api/suppliers/{supplier_id}/products: {e}")
         return jsonify({'error': str(e)}), 500
 
+@app.route('/supplier/<supplier_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_supplier(supplier_id):
+    try:
+        supplier = pb.collection(SUPPLIER_COLLECTION).get_one(supplier_id)
+        
+        if request.method == 'POST':
+            # Get form data
+            updated_data = {
+                "name": request.form['name'],
+                "email": request.form.get('email', ''),
+                "contact": request.form['contact'],
+                "address": request.form.get('address', ''),
+                "notes": request.form.get('notes', '')
+            }
+            
+            try:
+                # Update supplier with new data
+                pb.collection(SUPPLIER_COLLECTION).update(supplier_id, updated_data)
+                flash("Supplier updated successfully!", "success")
+                return redirect(url_for('supplier_details', supplier_id=supplier_id))
+                
+            except ClientResponseError as e:
+                flash(f"Error updating supplier: {e}", 'error')
+        
+        # Convert supplier to dict for template
+        supplier_data = {
+            "id": supplier.id,
+            "name": getattr(supplier, "name", ""),
+            "email": getattr(supplier, "email", ""),
+            "contact": getattr(supplier, "contact", ""),
+            "address": getattr(supplier, "address", ""),
+            "notes": getattr(supplier, "notes", "")
+        }
+        
+    except ClientResponseError as e:
+        flash(f"Supplier not found: {e}", 'error')
+        return redirect(url_for('suppliers'))
+    except Exception as e:
+        flash(f"Error loading supplier: {e}", 'error')
+        return redirect(url_for('suppliers'))
+    
+    return render_template('edit_supplier.html', supplier=supplier_data)
+
 @app.route('/delete_supplier', methods=['POST'])
 @login_required
 def delete_supplier():
@@ -1866,6 +1910,34 @@ def delete_customer():
 
     return redirect(url_for('customers'))
 
+
+# =============================================================================
+# ERROR HANDLERS
+# =============================================================================
+
+@app.errorhandler(404)
+def page_not_found(error):
+    """Custom 404 error handler"""
+    current_year = datetime.now().year
+    return render_template('404.html', current_year=current_year), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    """Custom 500 error handler"""
+    current_year = datetime.now().year
+    return render_template('500.html', current_year=current_year), 500
+
+@app.errorhandler(403)
+def forbidden(error):
+    """Custom 403 error handler"""
+    current_year = datetime.now().year
+    return render_template('404.html', current_year=current_year), 403
+
+@app.errorhandler(405)
+def method_not_allowed(error):
+    """Custom 405 error handler"""
+    current_year = datetime.now().year
+    return render_template('404.html', current_year=current_year), 405
 
 # =============================================================================
 # TEMPLATE FILTERS AND UTILITY FUNCTIONS

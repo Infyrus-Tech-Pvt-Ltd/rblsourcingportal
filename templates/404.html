@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Not Found - RBL Sourcing Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='logo.jpg') }}">
+    <style>
+        .animate-bounce-slow {
+            animation: bounce 2s infinite;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center px-4">
+    <div class="max-w-md w-full bg-white rounded-lg shadow-2xl p-8 text-center">
+        <!-- Logo -->
+        <div class="mb-6">
+            <img src="{{ url_for('static', filename='logo.jpg') }}" alt="RBL Sourcing" class="mx-auto h-16 w-auto">
+        </div>
+        
+        <!-- 404 Icon -->
+        <div class="mb-6">
+            <div class="inline-flex items-center justify-center w-24 h-24 bg-red-100 rounded-full animate-bounce-slow">
+                <svg class="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+            </div>
+        </div>
+        
+        <!-- Error Message -->
+        <h1 class="text-4xl font-bold text-gray-800 mb-2">404</h1>
+        <h2 class="text-xl font-semibold text-gray-600 mb-4">Page Not Found</h2>
+        <p class="text-gray-500 mb-8">
+            Sorry, the page you are looking for doesn't exist or has been moved. 
+            Please check the URL or navigate back to our homepage.
+        </p>
+        
+        <!-- Action Buttons -->
+        <div class="space-y-3">
+            <a href="{{ url_for('dashboard') }}" 
+               class="w-full inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition duration-200">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
+                Go to Dashboard
+            </a>
+            
+            <button onclick="history.back()" 
+                    class="w-full inline-flex items-center justify-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition duration-200">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Go Back
+            </button>
+        </div>
+        
+        <!-- Help Links -->
+        <div class="mt-8 pt-6 border-t border-gray-200">
+            <p class="text-sm text-gray-500 mb-3">Need help? Try these:</p>
+            <div class="flex flex-col space-y-2 text-sm">
+                <a href="{{ url_for('customers') }}" class="text-blue-600 hover:text-blue-800 transition duration-200">View Customers</a>
+                <a href="{{ url_for('product_list') }}" class="text-blue-600 hover:text-blue-800 transition duration-200">Browse Products</a>
+                <a href="{{ url_for('inquiry_page') }}" class="text-blue-600 hover:text-blue-800 transition duration-200">Manage Inquiries</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="absolute bottom-4 left-0 right-0 text-center">
+        <p class="text-white text-sm opacity-75">
+            &copy; {{ current_year or 2025 }} RBL Sourcing Portal. All rights reserved.
+        </p>
+    </div>
+</body>
+</html>
