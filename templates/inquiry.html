@@ -307,6 +307,7 @@
   let editingInquiryId = null;
   let searchQuery = "";
   let searchTimeout = null;
+  let currentInquiries = []; // Store current inquiries for delete function
 
   function toggleForm() {
     const form = document.getElementById("addInquiryForm");
@@ -464,6 +465,7 @@
       const data = await response.json();
 
       const inquiries = data.items || [];
+      currentInquiries = inquiries; // Store for delete function
       totalPages = data.totalPages || 1;
 
       // Update stats from API
@@ -652,14 +654,23 @@
   }
 
   async function deleteInquiry(id) {
-    if (!confirm("Are you sure you want to delete this inquiry?")) return;
-    try {
-      const res = await fetch(`/api/inquiries/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error(await res.text());
-      loadInquiries(currentPage);
-    } catch (e) {
-      alert("Failed to delete inquiry: " + e.message);
-    }
+    const inquiry = currentInquiries.find(inq => inq.id === id);
+    const inquiryName = inquiry ? `${inquiry.customer_name} - ${inquiry.product_name}` : 'this inquiry';
+    
+    showConfirmationModal({
+      title: 'Delete Inquiry',
+      message: `Are you sure you want to delete inquiry for ${inquiryName}?`,
+      confirmText: 'Delete Inquiry',
+      callback: async () => {
+        try {
+          const res = await fetch(`/api/inquiries/${id}`, { method: "DELETE" });
+          if (!res.ok) throw new Error(await res.text());
+          loadInquiries(currentPage);
+        } catch (e) {
+          alert("Failed to delete inquiry: " + e.message);
+        }
+      }
+    });
   }
 
   async function editInquiry(id) {

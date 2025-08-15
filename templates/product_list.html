@@ -221,9 +221,9 @@
                       </svg>
                     </a>
                     <form method="POST" action="{{ url_for('delete_product', product_id=p.id) }}" 
-                          onsubmit="return confirm('Are you sure you want to delete the product: {{ p.name }}?')" 
-                          class="inline">
-                      <button type="submit" 
+                          class="inline" id="deleteProductForm{{ p.id }}">
+                      <button type="button" 
+                              onclick="confirmDeleteProduct('{{ p.id }}', '{{ p.name }}')"
                               class="inline-flex items-center p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200" 
                               title="Delete Product">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -319,6 +319,17 @@
     if (event.target.id === 'imgModal') {
       closeModal();
     }
+  }
+
+  function confirmDeleteProduct(productId, productName) {
+    showConfirmationModal({
+      title: 'Delete Product',
+      message: `Are you sure you want to delete product "${productName}"? This action cannot be undone.`,
+      confirmText: 'Delete Product',
+      callback: () => {
+        document.getElementById(`deleteProductForm${productId}`).submit();
+      }
+    });
   }
 </script>
 {% endblock %}
