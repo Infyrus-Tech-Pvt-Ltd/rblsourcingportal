@@ -8,6 +8,16 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Add Heroicons for menu icons -->
   <script src="https://unpkg.com/heroicons@2.0.16/24/outline/index.js" type="module"></script>
+  
+  <!-- Notification System -->
+  <script src="{{ url_for('static', filename='js/notifications.js') }}" defer></script>
+  
+  <!-- Flash Messages Data -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div data-flash-messages='{{ messages | tojson | safe }}' style="display: none;"></div>
+    {% endif %}
+  {% endwith %}
   <style>
     /* Dark gradient button style */
     .btn-dark-gradient {

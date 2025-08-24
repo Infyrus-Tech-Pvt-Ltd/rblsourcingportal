@@ -455,25 +455,25 @@ document.getElementById('reminderForm').addEventListener('submit', function(e) {
   
   if (!topic) {
     e.preventDefault();
-    alert('Please enter a subject for the reminder.');
+    showError('Please enter a subject for the reminder.');
     return false;
   }
   
   if (!description) {
     e.preventDefault();
-    alert('Please enter a description for the reminder.');
+    showError('Please enter a description for the reminder.');
     return false;
   }
   
   if (!datetime) {
     e.preventDefault();
-    alert('Please select a date and time for the reminder.');
+    showError('Please select a date and time for the reminder.');
     return false;
   }
   
   if (!email || !email.includes('@')) {
     e.preventDefault();
-    alert('Please enter a valid email address.');
+    showError('Please enter a valid email address.');
     return false;
   }
   
@@ -483,9 +483,11 @@ document.getElementById('reminderForm').addEventListener('submit', function(e) {
   
   if (selectedTime <= currentTime) {
     e.preventDefault();
-    alert('Please select a future date and time for the reminder.');
+    showError('Please select a future date and time for the reminder.');
     return false;
   }
+  
+  showInfo('Creating reminder...');
   
   // Convert Nepal time to UTC before submitting
   const utcDateTime = convertNepalTimeToUTC(datetime);

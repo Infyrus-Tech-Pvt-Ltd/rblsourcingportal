@@ -143,4 +143,36 @@
     </div>
   </form>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.querySelector('form');
+  const nameInput = document.querySelector('input[name="name"]');
+  const priceInput = document.querySelector('input[name="price"]');
+
+  // Form submission validation
+  form.addEventListener('submit', function(e) {
+    let isValid = true;
+    
+    if (nameInput.value.trim().length < 2) {
+      showError("Product name must be at least 2 characters long");
+      nameInput.focus();
+      isValid = false;
+    }
+    
+    if (priceInput.value <= 0) {
+      showError("Product price must be greater than 0");
+      if (isValid) priceInput.focus();
+      isValid = false;
+    }
+    
+    if (!isValid) {
+      e.preventDefault();
+    } else {
+      showInfo("Saving product...");
+    }
+  });
+});
+</script>
+
 {% endblock %}

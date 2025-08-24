@@ -8,20 +8,7 @@
     <div class="mb-8">
       <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         <div>
-          <h1 class="text-4xl font-bold text-gray-900 m  async function loadInquiries(page = 1) {
-    inquiryTableBody.innerHTML = "";
-    paginationDiv.innerHTML = "";
-    currentPage = page;
-
-    try {
-      let url = `/api/inquiries?page=${page}&perPage=${perPage}`;
-      if (searchQuery) {
-        url += `&search=${encodeURIComponent(searchQuery)}`;
-      }
-      
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      const data = await response.json();y Management</h1>
+          <h1 class="text-4xl font-bold text-gray-900 mb-2">Inquiry Management</h1>
           <p class="text-gray-600">Track and manage customer product inquiries</p>
         </div>
         
@@ -412,10 +399,21 @@
 
   async function loadDropdowns() {
     try {
-      const [customers, products] = await Promise.all([
-        fetch("/api/customers").then(r => r.json()),
-        fetch("/api/products").then(r => r.json()),
+      const [customerResponse, productResponse] = await Promise.all([
+        fetch("/api/customers"),
+        fetch("/api/products"),
       ]);
+
+      if (!customerResponse.ok || !productResponse.ok) {
+        throw new Error("Failed to fetch data");
+      }
+
+      const customerData = await customerResponse.json();
+      const productData = await productResponse.json();
+
+      // Extract the actual data arrays from the response
+      const customers = customerData.data || customerData;
+      const products = productData.data || productData;
 
       // Store products data for price calculations
       productsData = products;
@@ -445,7 +443,7 @@
 
     } catch (e) {
       console.error("Failed to load dropdowns", e);
-      alert("Failed to load customers or products. Check console.");
+      showError("Failed to load customers or products. Check console.");
     }
   }
 
@@ -649,7 +647,7 @@
       document.getElementById("customerModal").classList.remove("hidden");
     } catch (e) {
       console.error("Failed to load customer details", e);
-      alert("Failed to load customer details.");
+      showError("Failed to load customer details.");
     }
   }
 
@@ -665,9 +663,10 @@
         try {
           const res = await fetch(`/api/inquiries/${id}`, { method: "DELETE" });
           if (!res.ok) throw new Error(await res.text());
+          showSuccess("Inquiry deleted successfully!");
           loadInquiries(currentPage);
         } catch (e) {
-          alert("Failed to delete inquiry: " + e.message);
+          showError("Failed to delete inquiry: " + e.message);
         }
       }
     });
@@ -708,7 +707,7 @@
 
       form.scrollIntoView({behavior: "smooth"});
     } catch (e) {
-      alert("Failed to load inquiry for editing: " + e.message);
+      showError("Failed to load inquiry for editing: " + e.message);
     }
   }
 
@@ -720,13 +719,13 @@
     const status = statusSelect.value;
     
     if (!customerId || !productId || !status) {
-      alert("Please select customer, product, and status.");
+      showError("Please select customer, product, and status.");
       return;
     }
 
     const quantity = parseInt(document.getElementById("quantity").value);
     if (isNaN(quantity) || quantity < 1) {
-      alert("Quantity must be a positive integer.");
+      showError("Quantity must be a positive integer.");
       return;
     }
 
@@ -761,8 +760,17 @@
       }
 
       if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(errorText);
+        const errorData = await res.json();
+        throw new Error(errorData.message || "An error occurred");
+      }
+
+      const result = await res.json();
+      
+      // Show success message
+      if (editingInquiryId) {
+        showSuccess("Inquiry updated successfully!");
+      } else {
+        showSuccess("Inquiry created successfully!");
       }
 
       e.target.reset();
@@ -770,7 +778,7 @@
       editingInquiryId = null;
       loadInquiries(currentPage);
     } catch (err) {
-      alert("Failed to save inquiry: " + err.message);
+      showError("Failed to save inquiry: " + err.message);
     }
   });
 
