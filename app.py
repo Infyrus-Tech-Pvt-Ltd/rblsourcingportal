@@ -486,6 +486,9 @@ def product_list():
             "qty_per_box": p.get("qty_per_box", ""),
             "box_size": p.get("box_size", ""),
             "box_weight": p.get("box_weight", ""),
+            "volume_weight_box": p.get("volume_weight_box", ""),
+            "excise_duty": p.get("excise_duty", ""),
+            "cbm_per_box": p.get("cbm_per_box", ""),
             "buying_rate": p.get("buying_rate", ""),
             "selling_rate": p.get("selling_rate", ""),
             "terms": p.get("terms", ""),
@@ -500,6 +503,7 @@ def product_list():
                 "notes": supplier_info.get("notes", "")
             },
             "model": p.get("model", ""),
+            "code": p.get("code", ""),
             "price": p.get("price", ""),
             "files": build_file_urls(p)
         })
@@ -575,6 +579,10 @@ def add_product():
             "qty_per_box": safe_int_str("qty_per_box"),
             "box_size": data.get("box_size", ""),
             "box_weight": safe_float_str("box_weight"),
+            "volume_weight_box": safe_float_str("volume_weight_box"),
+            "excise_duty": data.get("excise_duty",""),
+            "code": data.get("code",""),
+            "cbm_per_box": safe_float_str("cbm_per_box"),
             "buying_rate": safe_float_str("buying_rate"),
             "selling_rate": safe_float_str("selling_rate"),
             "terms": data.get("terms", ""),
@@ -741,6 +749,10 @@ def product_edit(product_id):
             "qty_per_box": safe_int_str("qty_per_box"),
             "box_size": data.get("box_size", ""),
             "box_weight": safe_float_str("box_weight"),
+            "volume_weight_box": safe_float_str("volume_weight_box"),
+            "excise_duty": data.get("excise_duty",""),
+            "code": data.get("code",""),
+            "cbm_per_box": safe_float_str("cbm_per_box"),
             "buying_rate": safe_float_str("buying_rate"),
             "selling_rate": safe_float_str("selling_rate"),
             "terms": data.get("terms", ""),
@@ -749,20 +761,23 @@ def product_edit(product_id):
             "model": data.get("model", ""),
             "price": safe_str(price),
         }
+        
+    
+        
 
-        # Handle file removal
+        # Always get current files
+        current_files = product.get("uploaded_docs", [])
+        if isinstance(current_files, str):
+            current_files = [current_files]
+
+# Handle file removal (if any)
         files_to_remove = data.get("files_to_remove", "")
         if files_to_remove:
             files_to_remove_list = [f.strip() for f in files_to_remove.split(',') if f.strip()]
-            
-            # Get current uploaded_docs
-            current_files = product.get("uploaded_docs", [])
-            if isinstance(current_files, str):
-                current_files = [current_files]
-            
-            # Filter out files to be removed
-            remaining_files = [f for f in current_files if f not in files_to_remove_list]
-            pb_data["uploaded_docs"] = remaining_files
+            current_files = [f for f in current_files if f not in files_to_remove_list]
+
+# Keep remaining files in PocketBase payload
+        pb_data["uploaded_docs"] = current_files
 
         # Prepare files
         files_payload = []
@@ -1490,6 +1505,7 @@ def suppliers():
                 "name": getattr(s, "name", ""),
                 "email": getattr(s, "email", ""),
                 "contact": getattr(s, "contact", ""),
+                "handle": getattr(s, "handle", ""),
                 "address": getattr(s, "address", ""),
                 "created": getattr(s, "created", None)
             }
@@ -1538,6 +1554,7 @@ def add_supplier():
             pb_data = {
                 "name": name,
                 "contact": contact,
+                "handle": data.get('handle', '').strip(),
                 "email": data.get('email', '').strip(),
                 "address": data.get('address', '').strip()
             }
@@ -1582,6 +1599,7 @@ def get_supplier_details(supplier_id):
             'id': getattr(supplier, 'id', ''),
             'name': getattr(supplier, 'name', ''),
             'email': getattr(supplier, 'email', ''),
+            'handle': getattr(supplier, 'handle', ''),
             'contact': getattr(supplier, 'contact', ''),
             'address': getattr(supplier, 'address', ''),
             'notes': getattr(supplier, 'notes', ''),
@@ -1639,6 +1657,7 @@ def edit_supplier(supplier_id):
                 "name": request.form['name'],
                 "email": request.form.get('email', ''),
                 "contact": request.form['contact'],
+                "handle": request.form['handle'],
                 "address": request.form.get('address', ''),
                 "notes": request.form.get('notes', '')
             }
@@ -1657,6 +1676,7 @@ def edit_supplier(supplier_id):
             "id": supplier.id,
             "name": getattr(supplier, "name", ""),
             "email": getattr(supplier, "email", ""),
+            "handle": getattr(supplier, "handle", ""),
             "contact": getattr(supplier, "contact", ""),
             "address": getattr(supplier, "address", ""),
             "notes": getattr(supplier, "notes", "")
