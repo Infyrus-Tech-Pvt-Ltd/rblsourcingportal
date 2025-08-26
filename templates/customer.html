@@ -133,10 +133,11 @@
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                     </svg>
                   </a>
-                  <form method="POST" action="{{ url_for('delete_customer') }}" class="inline" onsubmit="return confirm('Are you sure?')">
+                  <form method="POST" action="{{ url_for('delete_customer') }}" class="inline" id="deleteCustomerForm{{ customer.id }}">
                     <input type="hidden" name="customer_id" value="{{ customer.id }}">
                     <button 
-                      type="submit" 
+                      type="button" 
+                      onclick="confirmDeleteCustomer('{{ customer.id }}', '{{ customer.name }}')"
                       class="inline-flex items-center p-2 border border-transparent rounded-md text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors"
                       title="Delete Customer"
                     >
@@ -324,6 +325,17 @@
       closeDetailsModal();
     }
   });
+
+  function confirmDeleteCustomer(customerId, customerName) {
+    showConfirmationModal({
+      title: 'Delete Customer',
+      message: `Are you sure you want to delete "${customerName}"? This action cannot be undone and will remove all associated data.`,
+      confirmText: 'Delete Customer',
+      callback: () => {
+        document.getElementById(`deleteCustomerForm${customerId}`).submit();
+      }
+    });
+  }
 </script>
 
 {% endblock %}

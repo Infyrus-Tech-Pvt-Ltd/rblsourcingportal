@@ -8,6 +8,16 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Add Heroicons for menu icons -->
   <script src="https://unpkg.com/heroicons@2.0.16/24/outline/index.js" type="module"></script>
+  
+  <!-- Notification System -->
+  <script src="{{ url_for('static', filename='js/notifications.js') }}" defer></script>
+  
+  <!-- Flash Messages Data -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div data-flash-messages='{{ messages | tojson | safe }}' style="display: none;"></div>
+    {% endif %}
+  {% endwith %}
   <style>
     /* Dark gradient button style */
     .btn-dark-gradient {
@@ -167,10 +177,10 @@
       </button>
       
       <img src="{{ url_for('static', filename='logo.jpg') }}" alt="RBL Logo" class="h-10 w-20 mr-3 rounded-md" />
+      <h1 class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mt-4">Portal</h1>
     </div>
     
     <div class="flex items-center space-x-4">
-      <h1 class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Portal</h1>
       <!-- User profile dropdown -->
       <div class="relative">
         <button id="user-menu-button" class="flex items-center space-x-2 p-2 rounded-lg hover:bg-indigo-50 transition-colors">
@@ -396,6 +406,94 @@
 
     // Initialize sidebar on page load
     initializeSidebar();
+  </script>
+
+  <!-- Reusable Confirmation Modal -->
+  <div id="confirmationModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full transform transition-all">
+      <div class="p-6">
+        <!-- Icon -->
+        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+          <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+          </svg>
+        </div>
+        
+        <!-- Content -->
+        <div class="text-center">
+          <h3 class="text-lg font-medium text-gray-900 mb-2" id="confirmationTitle">
+            Confirm Action
+          </h3>
+          <p class="text-sm text-gray-500 mb-6" id="confirmationMessage">
+            Are you sure you want to proceed with this action?
+          </p>
+        </div>
+        
+        <!-- Buttons -->
+        <div class="flex gap-3">
+          <button 
+            type="button" 
+            onclick="closeConfirmationModal()" 
+            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+          >
+            Cancel
+          </button>
+          <button 
+            type="button" 
+            onclick="confirmAction()" 
+            class="flex-1 px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white font-medium rounded-lg hover:from-red-700 hover:to-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all"
+            id="confirmButton"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  let confirmationCallback = null;
+
+  function showConfirmationModal(options = {}) {
+    const {
+      title = 'Confirm Action',
+      message = 'Are you sure you want to proceed with this action?',
+      confirmText = 'Delete',
+      confirmClass = 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800',
+      callback = null
+    } = options;
+
+    document.getElementById('confirmationTitle').textContent = title;
+    document.getElementById('confirmationMessage').textContent = message;
+    
+    const confirmButton = document.getElementById('confirmButton');
+    confirmButton.textContent = confirmText;
+    confirmButton.className = `flex-1 px-4 py-2 ${confirmClass} text-white font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all`;
+    
+    confirmationCallback = callback;
+    document.getElementById('confirmationModal').classList.remove('hidden');
+    document.getElementById('confirmationModal').classList.add('flex');
+  }
+
+  function closeConfirmationModal() {
+    document.getElementById('confirmationModal').classList.add('hidden');
+    document.getElementById('confirmationModal').classList.remove('flex');
+    confirmationCallback = null;
+  }
+
+  function confirmAction() {
+    if (confirmationCallback) {
+      confirmationCallback();
+    }
+    closeConfirmationModal();
+  }
+
+  // Close modal when clicking outside
+  document.getElementById('confirmationModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeConfirmationModal();
+    }
+  });
   </script>
 </body>
 

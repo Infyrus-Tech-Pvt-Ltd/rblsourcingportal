@@ -107,7 +107,7 @@
                     </svg>
                   </div>
                   <input 
-                    type="tel" 
+                    type="text" 
                     id="phone"
                     name="phone" 
                     placeholder="Enter phone number" 
@@ -242,14 +242,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Name validation
   nameInput.addEventListener('blur', function() {
-    validateField(this, this.value.trim().length >= 2);
+    const isValid = this.value.trim().length >= 2;
+    validateField(this, isValid);
+    if (!isValid && this.value.trim().length > 0) {
+      showWarning("Name must be at least 2 characters long");
+    }
   });
 
   // Phone validation
-  phoneInput.addEventListener('blur', function() {
-    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-    validateField(this, phoneRegex.test(this.value.replace(/\s+/g, '')));
-  });
+phoneInput.addEventListener('blur', function() {
+  const isValid = this.value.trim().length > 0; // Only check if it's not empty
+  validateField(this, isValid);
+  if (!isValid && this.value.trim()) {
+    showWarning("Please enter a valid phone identifier (text allowed)");
+  }
+});
+
 
   // Email validation
   emailInput.addEventListener('blur', function() {
@@ -258,7 +266,11 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    validateField(this, emailRegex.test(this.value));
+    const isValid = emailRegex.test(this.value);
+    validateField(this, isValid);
+    if (!isValid) {
+      showWarning("Please enter a valid email address");
+    }
   });
 
   // Form submission validation
@@ -268,11 +280,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Validate required fields
     if (nameInput.value.trim().length < 2) {
       validateField(nameInput, false);
+      showError("Please enter a valid name (at least 2 characters)");
       isValid = false;
     }
     
     if (phoneInput.value.trim().length === 0) {
       validateField(phoneInput, false);
+      showError("Phone number is required");
       isValid = false;
     }
     
@@ -284,6 +298,8 @@ document.addEventListener('DOMContentLoaded', function() {
         firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
         firstInvalid.focus();
       }
+    } else {
+      showInfo("Creating customer...");
     }
   });
 });

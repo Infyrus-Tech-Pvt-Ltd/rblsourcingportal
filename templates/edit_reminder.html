@@ -205,29 +205,51 @@ function convertUTCToNepalTime(utcTimeString) {
   if (!utcTimeString) return '';
   
   try {
-    // Parse the UTC time string
+    console.log('Converting UTC to Nepal time:', utcTimeString);
+    
+    // Parse the UTC time string - handle various formats
     let utcDate;
     if (utcTimeString.includes('T')) {
-      // Handle ISO format: "2025-01-15T10:30"
-      utcDate = new Date(utcTimeString + 'Z'); // Add Z to indicate UTC
+      // Handle ISO format: "2025-01-15T10:30" or "2025-01-15T10:30:00"
+      if (!utcTimeString.endsWith('Z') && !utcTimeString.includes('+')) {
+        utcDate = new Date(utcTimeString + 'Z'); // Add Z to indicate UTC
+      } else {
+        utcDate = new Date(utcTimeString);
+      }
     } else {
       // Handle other formats
       utcDate = new Date(utcTimeString + ' UTC');
     }
     
+    console.log('Parsed UTC date:', utcDate);
+    
     // Check if date is valid
     if (isNaN(utcDate.getTime())) {
-      return utcTimeString; // Return original if parsing fails
+      console.log('Invalid date, returning original string');
+      return utcTimeString;
     }
     
     // Nepal is UTC+5:45
     const nepalOffset = 5 * 60 + 45; // 5 hours 45 minutes in minutes
     const nepalTime = new Date(utcDate.getTime() + (nepalOffset * 60 * 1000));
     
-    // Format for datetime-local input
+    console.log('Nepal time:', nepalTime);
+    
+    // Format for datetime-local input (YYYY-MM-DDTHH:MM)
     const year = nepalTime.getUTCFullYear();
     const month = String(nepalTime.getUTCMonth() + 1).padStart(2, '0');
     const day = String(nepalTime.getUTCDate()).padStart(2, '0');
+    const hours = String(nepalTime.getUTCHours()).padStart(2, '0');
+    const minutes = String(nepalTime.getUTCMinutes()).padStart(2, '0');
+    
+    const result = `${year}-${month}-${day}T${hours}:${minutes}`;
+    console.log('Formatted Nepal time for input:', result);
+    return result;
+  } catch (error) {
+    console.error('Error converting UTC to Nepal time:', error);
+    return '';
+  }
+}
     const hours = String(nepalTime.getUTCHours()).padStart(2, '0');
     const minutes = String(nepalTime.getUTCMinutes()).padStart(2, '0');
     
@@ -275,9 +297,40 @@ document.addEventListener('DOMContentLoaded', function() {
   if (datetimeInput) {
     // Convert the existing UTC value to Nepal time
     const utcValue = datetimeInput.getAttribute('data-utc-value');
+    console.log('UTC value from data attribute:', utcValue);
+    
     if (utcValue) {
-      const nepalTime = convertUTCToNepalTime(utcValue);
-      datetimeInput.value = nepalTime;
+      // Simple conversion - add 5:45 to UTC to get Nepal time
+      try {
+        let utcDate;
+        if (utcValue.includes('T')) {
+          utcDate = new Date(utcValue + (utcValue.endsWith('Z') ? '' : 'Z'));
+        } else {
+          utcDate = new Date(utcValue + ' UTC');
+        }
+        
+        if (!isNaN(utcDate.getTime())) {
+          // Add Nepal offset (5:45)
+          const nepalTime = new Date(utcDate.getTime() + (5 * 60 + 45) * 60 * 1000);
+          
+          // Format for datetime-local input
+          const year = nepalTime.getUTCFullYear();
+          const month = String(nepalTime.getUTCMonth() + 1).padStart(2, '0');
+          const day = String(nepalTime.getUTCDate()).padStart(2, '0');
+          const hours = String(nepalTime.getUTCHours()).padStart(2, '0');
+          const minutes = String(nepalTime.getUTCMinutes()).padStart(2, '0');
+          
+          const nepalTimeStr = `${year}-${month}-${day}T${hours}:${minutes}`;
+          console.log('Setting datetime input to Nepal time:', nepalTimeStr);
+          datetimeInput.value = nepalTimeStr;
+        } else {
+          console.log('Invalid UTC date, leaving field empty');
+        }
+      } catch (error) {
+        console.error('Error converting UTC to Nepal time:', error);
+      }
+    } else {
+      console.log('No UTC value found in data-utc-value attribute');
     }
     
     // Set minimum datetime to current Nepal time
@@ -300,53 +353,42 @@ document.querySelector('form').addEventListener('submit', function(e) {
   const datetime = document.getElementById('datetime').value;
   const email = document.getElementById('email').value.trim();
   
+  console.log('Form submission - field values:');
+  console.log('  topic:', topic);
+  console.log('  description:', description);
+  console.log('  datetime:', datetime);
+  console.log('  email:', email);
+  
   if (!topic) {
     e.preventDefault();
-    alert('Please enter a subject for the reminder.');
+    showError('Please enter a subject for the reminder.');
     return false;
   }
   
   if (!description) {
     e.preventDefault();
-    alert('Please enter a description for the reminder.');
+    showError('Please enter a description for the reminder.');
     return false;
   }
   
   if (!datetime) {
     e.preventDefault();
-    alert('Please select a date and time for the reminder.');
+    showError('Please select a date and time for the reminder.');
     return false;
   }
   
   if (!email || !email.includes('@')) {
     e.preventDefault();
-    alert('Please enter a valid email address.');
+    showError('Please enter a valid email address.');
     return false;
   }
   
-  // Check if selected time is in the future (Nepal time)
-  const selectedTime = new Date(datetime);
-  const currentTime = new Date();
+  showInfo('Updating reminder...');
   
-  if (selectedTime <= currentTime) {
-    if (!confirm('The selected time is in the past. The reminder will be sent immediately. Do you want to continue?')) {
-      e.preventDefault();
-      return false;
-    }
-  }
-  
-  // Convert Nepal time to UTC before submitting
-  const utcDateTime = convertNepalTimeToUTC(datetime);
-  
-  // Create hidden input with UTC time
-  const hiddenInput = document.createElement('input');
-  hiddenInput.type = 'hidden';
-  hiddenInput.name = 'datetime_utc';
-  hiddenInput.value = utcDateTime;
-  this.appendChild(hiddenInput);
-  
-  // Disable the original datetime input so it doesn't get submitted
-  document.getElementById('datetime').disabled = true;
+  // For now, let's send the datetime as-is and handle conversion on the backend
+  console.log('Form will be submitted with datetime:', datetime);
+});
+});
 });
 
 // Real-time email validation
@@ -362,9 +404,6 @@ document.getElementById('email').addEventListener('input', function() {
     this.setCustomValidity('');
     this.classList.remove('border-red-500');
     this.classList.add('border-gray-200');
-  }
-});
-</script>
   }
 });
 </script>

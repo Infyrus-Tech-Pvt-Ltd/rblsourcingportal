@@ -50,7 +50,7 @@ pb = PocketBase(POCKETBASE_URL)
 
 @app.context_processor
 def inject_version():
-    return dict(version=VERSION)
+    return dict(version=VERSION) 
 
 # =============================================================================
 # UTILITY FUNCTIONS
@@ -115,6 +115,24 @@ def generate_next_customer_id():
                 continue
     next_num = max_num + 1
     return f"{prefix}{str(next_num).zfill(4)}"
+
+# =============================================================================
+# NOTIFICATION HELPER FUNCTIONS
+# =============================================================================
+
+def flash_and_redirect(message, category='info', endpoint='dashboard', **kwargs):
+    """Helper function to flash message and redirect"""
+    flash(message, category)
+    return redirect(url_for(endpoint, **kwargs))
+
+def json_response(data=None, message=None, success=True, status_code=200):
+    """Helper function to return consistent JSON responses"""
+    response = {
+        'success': success,
+        'message': message,
+        'data': data
+    }
+    return jsonify(response), status_code
 
 # =============================================================================
 # EMAIL CONFIGURATION AND FUNCTIONS
@@ -468,6 +486,9 @@ def product_list():
             "qty_per_box": p.get("qty_per_box", ""),
             "box_size": p.get("box_size", ""),
             "box_weight": p.get("box_weight", ""),
+            "volume_weight_box": p.get("volume_weight_box", ""),
+            "excise_duty": p.get("excise_duty", ""),
+            "cbm_per_box": p.get("cbm_per_box", ""),
             "buying_rate": p.get("buying_rate", ""),
             "selling_rate": p.get("selling_rate", ""),
             "terms": p.get("terms", ""),
@@ -482,6 +503,7 @@ def product_list():
                 "notes": supplier_info.get("notes", "")
             },
             "model": p.get("model", ""),
+            "code": p.get("code", ""),
             "price": p.get("price", ""),
             "files": build_file_urls(p)
         })
@@ -557,6 +579,10 @@ def add_product():
             "qty_per_box": safe_int_str("qty_per_box"),
             "box_size": data.get("box_size", ""),
             "box_weight": safe_float_str("box_weight"),
+            "volume_weight_box": safe_float_str("volume_weight_box"),
+            "excise_duty": data.get("excise_duty",""),
+            "code": data.get("code",""),
+            "cbm_per_box": safe_float_str("cbm_per_box"),
             "buying_rate": safe_float_str("buying_rate"),
             "selling_rate": safe_float_str("selling_rate"),
             "terms": data.get("terms", ""),
@@ -584,11 +610,9 @@ def add_product():
         print("PocketBase Response:", resp.status_code, resp.text)
 
         if resp.status_code in (200, 201):
-            flash("Product saved successfully!", "success")
-            return redirect(url_for("product_list"))
+            return flash_and_redirect("Product saved successfully!", "success", "product_list")
         else:
-            flash(f"Error saving product: {resp.text}", "error")
-            return f"Error saving product: {resp.text}", resp.status_code
+            return flash_and_redirect(f"Error saving product: {resp.text}", "error", "add_product")
 
     # Render form
     return render_template(
@@ -725,6 +749,10 @@ def product_edit(product_id):
             "qty_per_box": safe_int_str("qty_per_box"),
             "box_size": data.get("box_size", ""),
             "box_weight": safe_float_str("box_weight"),
+            "volume_weight_box": safe_float_str("volume_weight_box"),
+            "excise_duty": data.get("excise_duty",""),
+            "code": data.get("code",""),
+            "cbm_per_box": safe_float_str("cbm_per_box"),
             "buying_rate": safe_float_str("buying_rate"),
             "selling_rate": safe_float_str("selling_rate"),
             "terms": data.get("terms", ""),
@@ -733,20 +761,23 @@ def product_edit(product_id):
             "model": data.get("model", ""),
             "price": safe_str(price),
         }
+        
+    
+        
 
-        # Handle file removal
+        # Always get current files
+        current_files = product.get("uploaded_docs", [])
+        if isinstance(current_files, str):
+            current_files = [current_files]
+
+# Handle file removal (if any)
         files_to_remove = data.get("files_to_remove", "")
         if files_to_remove:
             files_to_remove_list = [f.strip() for f in files_to_remove.split(',') if f.strip()]
-            
-            # Get current uploaded_docs
-            current_files = product.get("uploaded_docs", [])
-            if isinstance(current_files, str):
-                current_files = [current_files]
-            
-            # Filter out files to be removed
-            remaining_files = [f for f in current_files if f not in files_to_remove_list]
-            pb_data["uploaded_docs"] = remaining_files
+            current_files = [f for f in current_files if f not in files_to_remove_list]
+
+# Keep remaining files in PocketBase payload
+        pb_data["uploaded_docs"] = current_files
 
         # Prepare files
         files_payload = []
@@ -922,7 +953,7 @@ def create_inquiry():
     customer_id = data.get("customer_id")
     product_id = data.get("product_id")
     if not customer_id or not product_id:
-        return jsonify({"error": "Customer and Product are required"}), 400
+        return json_response(message="Customer and Product are required", success=False, status_code=400)
 
     try:
         # Get customer and product records to generate proper inquiry number
@@ -967,11 +998,11 @@ def create_inquiry():
             "status": data.get("status", "Inquiry")
         })
         print(f"Inquiry created: {record}")
-        return jsonify({"message": "Inquiry created", "id": record.id}), 201
+        return json_response(data={"id": record.id}, message="Inquiry created", success=True, status_code=201)
     except ClientResponseError as e:
-        return jsonify({"error": str(e)}), 500
+        return json_response(message=str(e), success=False, status_code=500)
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return json_response(message=str(e), success=False, status_code=500)
 
 @app.route("/api/inquiries/<inquiry_id>", methods=["PUT"])
 @login_required
@@ -1053,22 +1084,22 @@ def delete_inquiry(inquiry_id):
 def get_customers():
     try:
         records = pb.collection(CUSTOMER_COLLECTION).get_full_list()
-        return jsonify([{"id": r.id, "name": r.name} for r in records])
+        return json_response(data=[{"id": r.id, "name": r.name} for r in records])
     except ClientResponseError as e:
-        return jsonify({"error": str(e)}), 500
+        return json_response(message=str(e), success=False, status_code=500)
 
 @app.route("/api/products")
 @login_required
 def get_products():
     try:
         records = pb.collection(PRODUCT_COLLECTION).get_full_list()
-        return jsonify([{
+        return json_response(data=[{
             "id": r.id, 
             "name": r.name,
             "price": getattr(r, "price", 0)
         } for r in records])
     except ClientResponseError as e:
-        return jsonify({"error": str(e)}), 500
+        return json_response(message=str(e), success=False, status_code=500)
 
 @app.route("/api/customers/<customer_id>/history")
 @login_required
@@ -1348,20 +1379,50 @@ def edit_reminder(reminder_id):
             description = request.form.get("description")
             datetime_str = request.form.get("datetime_utc")  # Get UTC time from frontend
             email = request.form.get("email")
+            
+            # Fallback to regular datetime field if datetime_utc is not provided
+            if not datetime_str:
+                datetime_str = request.form.get("datetime")
+
+            # Debug logging
+            print(f"Form data received:")
+            print(f"  topic: {topic}")
+            print(f"  description: {description}")
+            print(f"  datetime_utc: {request.form.get('datetime_utc')}")
+            print(f"  datetime: {request.form.get('datetime')}")
+            print(f"  email: {email}")
+            print(f"  All form keys: {list(request.form.keys())}")
 
             if not (topic and description and datetime_str and email):
-                flash("All fields are required.", "error")
-                return render_template('edit_reminder.html', reminder=reminder)
+                missing_fields = []
+                if not topic: missing_fields.append("topic")
+                if not description: missing_fields.append("description")
+                if not datetime_str: missing_fields.append("datetime")
+                if not email: missing_fields.append("email")
+                error_msg = f"Missing required fields: {', '.join(missing_fields)}"
+                print(f"Validation failed: {error_msg}")
+                return flash_and_redirect(error_msg, "error", "edit_reminder", reminder_id=reminder_id)
 
             try:
-                # Parse the UTC datetime from frontend
-                utc_dt = datetime.fromisoformat(datetime_str)
-                # Convert to ISO format string without tz info
-                utc_dt_str = utc_dt.strftime("%Y-%m-%dT%H:%M")
+                # Parse the datetime from frontend
+                if datetime_str:
+                    # If we received datetime_utc, it's already in UTC
+                    if request.form.get("datetime_utc"):
+                        utc_dt = datetime.fromisoformat(datetime_str)
+                    else:
+                        # If we received regular datetime, assume it's Nepal time and convert to UTC
+                        nepal_dt = datetime.fromisoformat(datetime_str)
+                        # Nepal is UTC+5:45, so subtract to get UTC
+                        utc_dt = nepal_dt - timedelta(hours=5, minutes=45)
+                    
+                    # Convert to ISO format string without tz info
+                    utc_dt_str = utc_dt.strftime("%Y-%m-%dT%H:%M")
+                else:
+                    raise ValueError("No datetime provided")
 
             except Exception as e:
-                flash(f"Invalid datetime format: {e}", "error")
-                return render_template('edit_reminder.html', reminder=reminder)
+                print(f"DateTime conversion error: {e}")
+                return flash_and_redirect(f"Invalid datetime format: {e}", "error", "edit_reminder", reminder_id=reminder_id)
 
             update_data = {
                 "topic": topic,
@@ -1373,10 +1434,9 @@ def edit_reminder(reminder_id):
 
             try:
                 pb.collection("reminders").update(reminder_id, update_data)
-                flash("Reminder updated successfully!", "success")
-                return redirect(url_for("reminders"))
+                return flash_and_redirect("Reminder updated successfully!", "success", "reminders")
             except Exception as e:
-                flash(f"Failed to update reminder: {e}", "error")
+                return flash_and_redirect(f"Failed to update reminder: {e}", "error", "edit_reminder", reminder_id=reminder_id)
 
         return render_template('edit_reminder.html', reminder=reminder)
         
@@ -1445,6 +1505,7 @@ def suppliers():
                 "name": getattr(s, "name", ""),
                 "email": getattr(s, "email", ""),
                 "contact": getattr(s, "contact", ""),
+                "handle": getattr(s, "handle", ""),
                 "address": getattr(s, "address", ""),
                 "created": getattr(s, "created", None)
             }
@@ -1493,6 +1554,7 @@ def add_supplier():
             pb_data = {
                 "name": name,
                 "contact": contact,
+                "handle": data.get('handle', '').strip(),
                 "email": data.get('email', '').strip(),
                 "address": data.get('address', '').strip()
             }
@@ -1537,6 +1599,7 @@ def get_supplier_details(supplier_id):
             'id': getattr(supplier, 'id', ''),
             'name': getattr(supplier, 'name', ''),
             'email': getattr(supplier, 'email', ''),
+            'handle': getattr(supplier, 'handle', ''),
             'contact': getattr(supplier, 'contact', ''),
             'address': getattr(supplier, 'address', ''),
             'notes': getattr(supplier, 'notes', ''),
@@ -1594,6 +1657,7 @@ def edit_supplier(supplier_id):
                 "name": request.form['name'],
                 "email": request.form.get('email', ''),
                 "contact": request.form['contact'],
+                "handle": request.form['handle'],
                 "address": request.form.get('address', ''),
                 "notes": request.form.get('notes', '')
             }
@@ -1612,6 +1676,7 @@ def edit_supplier(supplier_id):
             "id": supplier.id,
             "name": getattr(supplier, "name", ""),
             "email": getattr(supplier, "email", ""),
+            "handle": getattr(supplier, "handle", ""),
             "contact": getattr(supplier, "contact", ""),
             "address": getattr(supplier, "address", ""),
             "notes": getattr(supplier, "notes", "")
@@ -1895,12 +1960,10 @@ def add_customer():
             }
             
             new_customer = pb.collection(CUSTOMER_COLLECTION).create(customer_data)
-            flash('Customer added successfully!', 'success')
+            return flash_and_redirect('Customer added successfully!', 'success', 'customers')
             
         except ClientResponseError as e:
-            flash(f"Error adding customer: {e}", 'error')
-
-        return redirect(url_for('customers'))
+            return flash_and_redirect(f"Error adding customer: {e}", 'error', 'add_customer')
 
     return render_template('add_customer.html')
 
@@ -1909,16 +1972,13 @@ def add_customer():
 def delete_customer():
     customer_id = request.form.get('customer_id')
     if not customer_id:
-        flash("Customer ID is required to delete.", "error")
-        return redirect(url_for('customers'))
+        return flash_and_redirect("Customer ID is required to delete.", "error", "customers")
 
     try:
         pb.collection(CUSTOMER_COLLECTION).delete(customer_id)
-        flash("Customer deleted successfully!", "success")
+        return flash_and_redirect("Customer deleted successfully!", "success", "customers")
     except ClientResponseError as e:
-        flash(f"Error deleting customer: {e}", "error")
-
-    return redirect(url_for('customers'))
+        return flash_and_redirect(f"Error deleting customer: {e}", "error", "customers")
 
 
 # =============================================================================

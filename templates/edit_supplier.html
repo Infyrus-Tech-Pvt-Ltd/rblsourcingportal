@@ -87,6 +87,16 @@
                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
               </div>
 
+              <div class="md:col-span-2">
+                <label for="handle" class="block text-sm font-medium text-gray-700 mb-2">
+                  <i class="fas fa-envelope mr-2 text-gray-500"></i>
+                  Social Media Handle
+                </label>
+                <input type="text" id="handle" name="handle" value="{{ supplier.handle }}"
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+              </div>
+            </div>
+
               <!-- Email -->
               <div class="md:col-span-2">
                 <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
@@ -167,6 +177,7 @@
 document.addEventListener('DOMContentLoaded', function() {
   const form = document.querySelector('form');
   const nameInput = document.getElementById('name');
+  const socialinput = document.getElementById('handle');
   const contactInput = document.getElementById('contact');
   const emailInput = document.getElementById('email');
 
@@ -185,6 +196,20 @@ document.addEventListener('DOMContentLoaded', function() {
   nameInput.addEventListener('blur', function() {
     validateField(this, this.value.trim().length >= 2);
   });
+
+  // Social media handle validation
+socialinput.addEventListener('blur', function() {
+  if (this.value.trim() === '') {
+    this.classList.remove('border-red-300', 'focus:ring-red-500', 'focus:border-red-500', 
+                          'border-green-300', 'focus:ring-green-500', 'focus:border-green-500');
+    return; // Optional: handle is not required
+  }
+  
+  // Example: allow @username or URL formats
+  const handleRegex = /^(@?[a-zA-Z0-9_.]+|https?:\/\/(www\.)?[a-zA-Z0-9_.-]+\.[a-z]{2,}\/?.*)$/;
+  validateField(this, handleRegex.test(this.value.trim()));
+});
+
 
   // Contact validation
   contactInput.addEventListener('blur', function() {
