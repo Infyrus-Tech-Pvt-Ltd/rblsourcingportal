@@ -107,7 +107,7 @@
                     </svg>
                   </div>
                   <input 
-                    type="tel" 
+                    type="text" 
                     id="phone"
                     name="phone" 
                     placeholder="Enter phone number" 
@@ -250,14 +250,14 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Phone validation
-  phoneInput.addEventListener('blur', function() {
-    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-    const isValid = phoneRegex.test(this.value.replace(/\s+/g, ''));
-    validateField(this, isValid);
-    if (!isValid && this.value.trim()) {
-      showWarning("Please enter a valid phone number");
-    }
-  });
+phoneInput.addEventListener('blur', function() {
+  const isValid = this.value.trim().length > 0; // Only check if it's not empty
+  validateField(this, isValid);
+  if (!isValid && this.value.trim()) {
+    showWarning("Please enter a valid phone identifier (text allowed)");
+  }
+});
+
 
   // Email validation
   emailInput.addEventListener('blur', function() {
