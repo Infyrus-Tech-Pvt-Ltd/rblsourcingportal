@@ -2,15 +2,8 @@ name: Build and Push to GHCR
 
 on:
   push:
-    branches:
-      - main
-      - master
     tags:
-      - 'v*'
-  pull_request:
-    branches:
-      - main
-      - master
+      - 'v*'   # Only trigger when a tag like v1.0.0 is pushed
 
 env:
   REGISTRY: ghcr.io
@@ -40,8 +33,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=ref,event=branch
-            type=ref,event=pr
+            type=ref,event=tag
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=raw,value=latest,enable={{is_default_branch}}
