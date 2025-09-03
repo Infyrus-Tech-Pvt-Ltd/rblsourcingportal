@@ -4,8 +4,6 @@ services:
     container_name: rbl-portal
     ports:
       - "8090"
-    volumes:
-      - ./backend:/app/backend
     environment:
       SECRET_KEY: ${SECRET_KEY}
       DEV_MODE: ${DEV_MODE}
