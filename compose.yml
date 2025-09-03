@@ -3,10 +3,20 @@ services:
     image: ghcr.io/rkjha-infyrus/rblsourcingportal:latest
     container_name: rbl-portal
     ports:
-      - "8090:8090"
-      - "5050:5050"
-    volumes:
-      - ./backend:/app/backend
+      - "8090"
+    environment:
+      SECRET_KEY: ${SECRET_KEY}
+      DEV_MODE: ${DEV_MODE}
+      VERSION: ${VERSION}
+      POCKETBASE_URL: ${POCKETBASE_URL}
+      POCKETBASE_ADMIN_EMAIL: ${POCKETBASE_ADMIN_EMAIL}
+      POCKETBASE_ADMIN_PASSWORD: ${POCKETBASE_ADMIN_PASSWORD}
+      CURRENT_YEAR: ${CURRENT_YEAR}
+      HOST: ${HOST}
+      PORT: ${PORT}
+      FROM: ${FROM}
+      LOGIN: ${LOGIN}
+      PASS: ${PASS}
     env_file:
       - .env
     restart: unless-stopped

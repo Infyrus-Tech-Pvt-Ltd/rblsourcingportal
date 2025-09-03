@@ -18,4 +18,4 @@ EXPOSE 8090
 EXPOSE 5050
 
 # Run the app
-CMD ["python", "runner.py"]
+CMD ["python", "app.py"]
