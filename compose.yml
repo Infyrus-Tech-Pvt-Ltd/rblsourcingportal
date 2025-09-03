@@ -1,6 +1,6 @@
 services:
   rbl-portal:
-    image: ghcr.io/rkjha-infyrus/rblsourcingportal:latest
+    image: ghcr.io/infyrus-tech-pvt-ltd/rblsourcingportal:latest
     container_name: rbl-portal
     ports:
       - "5050"
