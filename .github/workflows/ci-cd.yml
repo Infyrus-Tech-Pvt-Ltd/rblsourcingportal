@@ -1,8 +1,16 @@
 name: Build and Push to GHCR
 
 on:
-  release:
-    types: [published]  # Trigger only when a release is published
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+      - master
 
 env:
   REGISTRY: ghcr.io
@@ -32,10 +40,11 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=ref,event=release         # Tag from the release
-            type=semver,pattern={{version}} 
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-            type=raw,value=latest           # Always tag latest
+            type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
