@@ -3,7 +3,7 @@ services:
     image: ghcr.io/rkjha-infyrus/rblsourcingportal:latest
     container_name: rbl-portal
     ports:
-      - "8090"
+      - "5050"
     environment:
       SECRET_KEY: ${SECRET_KEY}
       DEV_MODE: ${DEV_MODE}
